@@ -1,8 +1,8 @@
-package presentation
+package web
 
 import (
-	"github.com/lyubomirr/meme-generator/core/services"
-	"github.com/lyubomirr/meme-generator/persistence"
+	"github.com/lyubomirr/meme-generator-app/core/services"
+	"github.com/lyubomirr/meme-generator-app/persistence"
 )
 
 func createServer() *apiServer {

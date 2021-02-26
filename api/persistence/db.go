@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/lyubomirr/meme-generator/core/entities"
+	"github.com/lyubomirr/meme-generator-app/core/entities"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"sync"

@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"github.com/lyubomirr/meme-generator/core/entities"
+	"github.com/lyubomirr/meme-generator-app/core/entities"
 )
 
 type dbRole struct {

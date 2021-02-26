@@ -3,8 +3,8 @@ package services
 import (
 	"errors"
 	"github.com/golang/mock/gomock"
-	"github.com/lyubomirr/meme-generator/core/entities"
-	"github.com/lyubomirr/meme-generator/core/mocks"
+	"github.com/lyubomirr/meme-generator-app/core/entities"
+	"github.com/lyubomirr/meme-generator-app/core/mocks"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
 )

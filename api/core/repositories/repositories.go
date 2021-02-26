@@ -1,6 +1,6 @@
 package repositories
 
-import "github.com/lyubomirr/meme-generator/core/entities"
+import "github.com/lyubomirr/meme-generator-app/core/entities"
 //go:generate mockgen -destination=../mocks/mock_user_repository.go -package=mocks -mock_names=User=MockUserRepository . User
 type User interface {
 	Get(id uint) (entities.User, error)

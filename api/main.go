@@ -1,12 +1,7 @@
 package main
 
-import (
-	"github.com/lyubomirr/meme-generator/presentation"
-	"log"
-	"net/http"
-)
+import "github.com/lyubomirr/meme-generator-app/web"
 
 func main() {
-	router := presentation.GetRouter()
-	log.Fatal(http.ListenAndServe(":8080", router))
+	web.Serve(":8080")
 }

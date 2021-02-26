@@ -2,9 +2,9 @@ package services
 
 import (
 	"errors"
-	"github.com/lyubomirr/meme-generator/core/entities"
-	customErr "github.com/lyubomirr/meme-generator/core/errors"
-	"github.com/lyubomirr/meme-generator/core/repositories"
+	"github.com/lyubomirr/meme-generator-app/core/entities"
+	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
+	"github.com/lyubomirr/meme-generator-app/core/repositories"
 	"golang.org/x/crypto/bcrypt"
 )
 

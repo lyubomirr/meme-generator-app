@@ -2,8 +2,8 @@ package persistence
 
 import (
 	"fmt"
-	"github.com/lyubomirr/meme-generator/core/entities"
-	"github.com/lyubomirr/meme-generator/core/repositories"
+	"github.com/lyubomirr/meme-generator-app/core/entities"
+	"github.com/lyubomirr/meme-generator-app/core/repositories"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"

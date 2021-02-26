@@ -1,4 +1,4 @@
-module github.com/lyubomirr/meme-generator
+module github.com/lyubomirr/meme-generator-app
 
 go 1.15
 
