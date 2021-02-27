@@ -5,7 +5,7 @@ import "github.com/lyubomirr/meme-generator-app/core/entities"
 type User interface {
 	Get(id uint) (entities.User, error)
 	GetByUsername(username string) (entities.User, error)
-	Create(user entities.User) (entities.User, error)
+	Create(user entities.User) (uint, error)
 	Update(user entities.User) (entities.User, error)
 	Delete(id uint) error
 }

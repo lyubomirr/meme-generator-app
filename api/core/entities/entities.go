@@ -7,6 +7,11 @@ const (
 	NormalRoleId = 2
 )
 
+const (
+	AdminRoleName RoleName = "Administrator"
+	NormalRoleName RoleName = "Normal"
+)
+
 type Role struct {
 	ID uint
 	Name RoleName

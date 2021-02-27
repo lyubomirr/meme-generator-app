@@ -63,7 +63,7 @@ func seedData() error {
 
 	result := db.FirstOrCreate(&dbRole{}, dbRole{
 		ID: entities.AdminRoleId,
-		Name:  "Administrator",
+		Name:  entities.AdminRoleName,
 	})
 	if result.Error != nil {
 		return result.Error
@@ -71,7 +71,7 @@ func seedData() error {
 
 	result = db.FirstOrCreate(&dbRole{}, &dbRole{
 		ID: entities.NormalRoleId,
-		Name: "Normal",
+		Name: entities.NormalRoleName,
 	})
 	if result.Error != nil {
 		return result.Error

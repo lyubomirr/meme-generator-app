@@ -1,8 +1,10 @@
 package persistence
 
 import (
+	"errors"
 	"fmt"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
+	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
 	"github.com/lyubomirr/meme-generator-app/core/repositories"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -85,39 +87,43 @@ func (m *mySqlUserRepository) GetByUsername(username string) (entities.User, err
 	return user.toEntity(), nil
 }
 
-func (m *mySqlUserRepository) Create(user entities.User) (entities.User, error) {
+func (m *mySqlUserRepository) Create(user entities.User) (uint, error) {
 	err := checkUserConstraints(user)
 	if err != nil {
-		return entities.User{}, err
+		return 0, err
 	}
 
 	u, err := m.GetByUsername(user.Username)
 	if err == nil && u != (entities.User{}) {
-		return entities.User{}, fmt.Errorf("the user already exists")
+		return 0, customErr.ExistingResourceError{
+			Err: errors.New(fmt.Sprintf("User with name %v already exists", user.Username)),
+		}
 	}
 
 	model := newUser(user)
 	hashed, err := bcrypt.GenerateFromPassword([]byte(model.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return entities.User{}, fmt.Errorf("hashing password failed: %w", err)
+		return 0, fmt.Errorf("hashing password failed: %w", err)
 	}
 
 	model.Password = string(hashed)
 
-	result := m.db.Create(model)
+	result := m.db.Create(&model)
 	if result.Error != nil {
-		return entities.User{}, result.Error
+		return 0, result.Error
 	}
-	return user, nil
+	return model.ID, nil
 }
 
 func checkUserConstraints(user entities.User) error {
 	if len(user.Username) > usernameMaxLength {
-		return fmt.Errorf("username length cannot contain more than %v symbols", usernameMaxLength)
+		return customErr.NewValidationError(
+			fmt.Errorf("username length cannot contain more than %v symbols", usernameMaxLength))
 	}
 
 	if len(user.Password) < minPasswordLength {
-		return fmt.Errorf(fmt.Sprintf("password should contain at least %v symbols", minPasswordLength))
+		return customErr.NewValidationError(
+			fmt.Errorf(fmt.Sprintf("password should contain at least %v symbols", minPasswordLength)))
 	}
 
 	return nil
@@ -138,7 +144,8 @@ func (m *mySqlUserRepository) Update(user entities.User) (entities.User, error) 
 		//A new password is set - validate length and hash
 		if len(user.Password) < minPasswordLength {
 			return entities.User{},
-			fmt.Errorf(fmt.Sprintf("password should contain at least %v symbols", minPasswordLength))
+			customErr.NewValidationError(
+				fmt.Errorf("password should contain at least %v symbols", minPasswordLength))
 		}
 
 		hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

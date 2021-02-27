@@ -7,7 +7,8 @@ import (
 )
 
 type apiServer struct {
-	authService *services.Authentication
+	authService services.User
+	jwt *jwtHandler
 }
 
 func Serve(address string) {

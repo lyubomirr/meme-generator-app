@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestAuthService_ValidateCredentials(t *testing.T) {
+func TestUserService_ValidateCredentials(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -30,18 +30,15 @@ func TestAuthService_ValidateCredentials(t *testing.T) {
 	m := mocks.NewMockUserRepository(ctrl)
 	m.EXPECT().GetByUsername(gomock.Eq(user.Username)).Return(user, nil)
 
-	sut := authService{userRepository: m}
-	err = sut.ValidateCredentials(LoginModel{
-		Username: user.Username,
-		Password: plainTextPassword,
-	})
+	sut := userService{userRepository: m}
+	_, err = sut.ValidateCredentials(user.Username, plainTextPassword)
 
 	if err != nil {
 		t.Errorf("expected no error but got: %v", err)
 	}
 }
 
-func TestAuthService_ValidateCredentials_ShouldFailIfNoUser(t *testing.T) {
+func TestUserService_ValidateCredentials_ShouldFailIfNoUser(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -50,18 +47,15 @@ func TestAuthService_ValidateCredentials_ShouldFailIfNoUser(t *testing.T) {
 	m := mocks.NewMockUserRepository(ctrl)
 	m.EXPECT().GetByUsername(gomock.Eq(invalidUser)).Return(entities.User{}, errors.New("no user"))
 
-	sut := authService{userRepository: m}
-	err := sut.ValidateCredentials(LoginModel{
-		Username: invalidUser,
-		Password: "alabala",
-	})
+	sut := userService{userRepository: m}
+	_, err := sut.ValidateCredentials(invalidUser, "alabala")
 
 	if err == nil {
 		t.Error("expected error but got nil")
 	}
 }
 
-func TestAuthService_ValidateCredentials_ShouldFailIfWrongPassword(t *testing.T) {
+func TestUserService_ValidateCredentials_ShouldFailIfWrongPassword(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -77,11 +71,8 @@ func TestAuthService_ValidateCredentials_ShouldFailIfWrongPassword(t *testing.T)
 	m := mocks.NewMockUserRepository(ctrl)
 	m.EXPECT().GetByUsername(gomock.Eq(user.Username)).Return(user, nil)
 
-	sut := authService{userRepository: m}
-	err := sut.ValidateCredentials(LoginModel{
-		Username: user.Username,
-		Password: plainTextPassword,
-	})
+	sut := userService{userRepository: m}
+	_, err := sut.ValidateCredentials(user.Username, plainTextPassword)
 
 	if err == nil {
 		t.Errorf("expected error but got nil")
