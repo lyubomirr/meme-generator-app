@@ -22,9 +22,9 @@ func (s *apiServer) registerHandler (w http.ResponseWriter, r *http.Request) {
 	}
 
 	model.User.Role = entities.Role{ID: entities.NormalRoleId}
-	u, err := s.authService.Create(model.User)
+	u, err := s.authService.Create(r.Context(), model.User)
 	if err != nil {
-		if errors.Is(err, customErr.ValidationError{}) || errors.Is(err, customErr.ExistingResourceError{}) {
+		if errors.As(err, &customErr.ValidationError{}) || errors.As(err, &customErr.ExistingResourceError{}) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -46,7 +46,7 @@ func (s *apiServer) loginHandler (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := s.authService.ValidateCredentials(model.Username, model.Password)
+	u, err := s.authService.ValidateCredentials(r.Context(), model.Username, model.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return

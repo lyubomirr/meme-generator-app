@@ -35,10 +35,10 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockUserRepository) Create(arg0 entities.User) (entities.User, error) {
+func (m *MockUserRepository) Create(arg0 entities.User) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
-	ret0, _ := ret[0].(entities.User)
+	ret0, _ := ret[0].(uint)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

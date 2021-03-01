@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
@@ -10,10 +11,9 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type User interface {
-	ValidateCredentials(username string, password string) (entities.User, error)
-	Create(user entities.User) (entities.User, error)
+	ValidateCredentials(ctx context.Context, username string, password string) (entities.User, error)
+	Create(ctx context.Context, user entities.User) (entities.User, error)
 }
 
 func NewUserService(userRepo repositories.User) User {
@@ -24,7 +24,8 @@ type userService struct {
 	userRepository repositories.User
 }
 
-func (a *userService) ValidateCredentials(username string, password string) (entities.User, error) {
+func (a *userService) ValidateCredentials(
+	ctx context.Context, username string, password string) (entities.User, error) {
 	user, err := a.userRepository.GetByUsername(username)
 	if err != nil {
 		return entities.User{}, customErr.NewAuthError(err)
@@ -37,13 +38,14 @@ func (a *userService) ValidateCredentials(username string, password string) (ent
 	return user, nil
 }
 
-func (a *userService) Create(user entities.User) (entities.User, error) {
+func (a *userService) Create(ctx context.Context, user entities.User) (entities.User, error) {
 	u, err := a.userRepository.GetByUsername(user.Username)
-	if err == nil && u != (entities.User{}) {
+	if err == nil {
 		return entities.User{}, customErr.NewExistingResourceError(
 			errors.New(fmt.Sprintf("User with name %v already exists", user.Username)))
 	}
 
+	//TODO: ADD CHECK FOR ADMIN
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return entities.User{}, err
 	}

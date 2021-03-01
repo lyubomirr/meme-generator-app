@@ -23,5 +23,26 @@ type User struct {
 	Password string
 	Role     Role
 	PictureURL string
+	Memes []Meme
 }
 
+type Meme struct {
+	ID uint
+	Author User
+	Title string
+	FilePath string
+	Comments []Comment
+}
+
+type Comment struct {
+	ID uint
+	Author User
+	MemeID uint
+	Content string
+}
+
+type Template struct {
+	ID uint
+	Name string
+	FilePath string
+}

@@ -9,7 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 )
 
 const (
@@ -18,12 +17,14 @@ const (
 )
 
 type dbUser struct {
-	gorm.Model
+	ID         uint
 	Username   string `gorm:"type:varchar(25);uniqueIndex"`
 	Password   string
 	RoleID     uint
 	Role       dbRole
 	PictureURL string
+	Memes      []dbMeme    `gorm:"foreignKey:AuthorID"`
+	Comment    []dbComment `gorm:"foreignKey:AuthorID"`
 }
 
 func (dbUser) TableName() string {
@@ -32,21 +33,17 @@ func (dbUser) TableName() string {
 
 func (u dbUser) toEntity() entities.User {
 	return entities.User{
-		Username: u.Username,
-		Password: u.Password,
-		Role: u.Role.toEntity(),
+		ID:         u.ID,
+		Username:   u.Username,
+		Password:   u.Password,
+		Role:       u.Role.toEntity(),
 		PictureURL: u.PictureURL,
 	}
 }
 
 func newUser(entity entities.User) dbUser {
 	return dbUser{
-		Model:      gorm.Model{
-			ID:        entity.ID,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			DeletedAt: gorm.DeletedAt{},
-		},
+		ID:         entity.ID,
 		Username:   entity.Username,
 		Password:   entity.Password,
 		RoleID:     entity.Role.ID,
@@ -93,8 +90,8 @@ func (m *mySqlUserRepository) Create(user entities.User) (uint, error) {
 		return 0, err
 	}
 
-	u, err := m.GetByUsername(user.Username)
-	if err == nil && u != (entities.User{}) {
+	_, err = m.GetByUsername(user.Username)
+	if err == nil {
 		return 0, customErr.ExistingResourceError{
 			Err: errors.New(fmt.Sprintf("User with name %v already exists", user.Username)),
 		}
@@ -138,14 +135,13 @@ func (m *mySqlUserRepository) Update(user entities.User) (entities.User, error) 
 
 	dbUser.RoleID = user.Role.ID
 	dbUser.PictureURL = user.PictureURL
-	dbUser.UpdatedAt = time.Now()
 
 	if dbUser.Password != user.Password {
 		//A new password is set - validate length and hash
 		if len(user.Password) < minPasswordLength {
 			return entities.User{},
-			customErr.NewValidationError(
-				fmt.Errorf("password should contain at least %v symbols", minPasswordLength))
+				customErr.NewValidationError(
+					fmt.Errorf("password should contain at least %v symbols", minPasswordLength))
 		}
 
 		hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -175,5 +171,3 @@ func (m *mySqlUserRepository) Delete(id uint) error {
 	}
 	return nil
 }
-
-

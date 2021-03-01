@@ -31,7 +31,13 @@ func init() {
 
 func migrate() error {
 	db := getDB()
-	err := db.AutoMigrate(&dbRole{})
+
+	err := db.AutoMigrate(&dbComment{})
+	if err != nil {
+		return err
+	}
+
+	err = db.AutoMigrate(&dbRole{})
 	if err != nil {
 		return err
 	}
@@ -40,6 +46,12 @@ func migrate() error {
 	if err != nil {
 		return err
 	}
+
+	err = db.AutoMigrate(&dbMeme{})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -86,11 +98,6 @@ func seedData() error {
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			result = db.Create(&dbUser{
-				Model:      gorm.Model{
-					CreatedAt: time.Time{},
-					UpdatedAt: time.Time{},
-					DeletedAt: gorm.DeletedAt{},
-				},
 				Username:   "admin",
 				Password:   "$2a$10$4M/iO9uQzFmZW600Dcj39.Pv.K5E5IXR9zNwl0lpMKQajXwOPBp56",
 				RoleID:     entities.AdminRoleId,
