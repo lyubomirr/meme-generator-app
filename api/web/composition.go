@@ -7,8 +7,8 @@ import (
 )
 
 func createServer() *apiServer {
-	userRepo := persistence.NewUserRepository()
-	authService := services.NewUserService(userRepo)
+	uowFactory := persistence.NewUnitOfWorkFactory()
+	authService := services.NewUserService(uowFactory)
 	jwtHandler := jwtHandler{
 		Secret:   "secret12312312",
 		Lifetime: time.Hour * 24,

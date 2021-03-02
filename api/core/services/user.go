@@ -16,17 +16,20 @@ type User interface {
 	Create(ctx context.Context, user entities.User) (entities.User, error)
 }
 
-func NewUserService(userRepo repositories.User) User {
-	return &userService{userRepository: userRepo}
+func NewUserService(uowFactory repositories.UoWFactory) User {
+	return &userService{uowFactory: uowFactory}
 }
 
 type userService struct {
-	userRepository repositories.User
+	uowFactory repositories.UoWFactory
 }
 
 func (a *userService) ValidateCredentials(
 	ctx context.Context, username string, password string) (entities.User, error) {
-	user, err := a.userRepository.GetByUsername(username)
+	uow := a.uowFactory.Create()
+	repo := uow.GetUserRepository()
+
+	user, err := repo.GetByUsername(username)
 	if err != nil {
 		return entities.User{}, customErr.NewAuthError(err)
 	}
@@ -39,7 +42,10 @@ func (a *userService) ValidateCredentials(
 }
 
 func (a *userService) Create(ctx context.Context, user entities.User) (entities.User, error) {
-	u, err := a.userRepository.GetByUsername(user.Username)
+	uow := a.uowFactory.Create()
+	repo := uow.GetUserRepository()
+
+	u, err := repo.GetByUsername(user.Username)
 	if err == nil {
 		return entities.User{}, customErr.NewExistingResourceError(
 			errors.New(fmt.Sprintf("User with name %v already exists", user.Username)))
@@ -50,12 +56,12 @@ func (a *userService) Create(ctx context.Context, user entities.User) (entities.
 		return entities.User{}, err
 	}
 
-	id, err := a.userRepository.Create(user)
+	id, err := repo.Create(user)
 	if err != nil {
 		return entities.User{}, err
 	}
 
-	u, err = a.userRepository.Get(id)
+	u, err = repo.Get(id)
 	if err != nil {
 		return entities.User{}, err
 	}

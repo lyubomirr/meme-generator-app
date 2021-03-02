@@ -1,6 +1,8 @@
 package repositories
 
-import "github.com/lyubomirr/meme-generator-app/core/entities"
+import (
+	"github.com/lyubomirr/meme-generator-app/core/entities"
+)
 //go:generate mockgen -destination=../mocks/mock_user_repository.go -package=mocks -mock_names=User=MockUserRepository . User
 type User interface {
 	Get(id uint) (entities.User, error)
@@ -25,4 +27,25 @@ type Template interface {
 	Create(meme entities.Template) (uint, error)
 	Update(meme entities.Template) (entities.Template, error)
 	Delete(id uint) error
+}
+
+type File interface {
+	Save(file []byte, path string) error
+	Delete(path string) error
+}
+
+//go:generate mockgen -destination=../mocks/mock_uow.go -package=mocks -mock_names=UnitOfWork=MockUnitOfWork . UnitOfWork
+type UnitOfWork interface {
+	GetUserRepository() User
+	GetMemeRepository() Meme
+	GetTemplateRepository() Template
+	GetFileRepository() File
+	BeginTransaction() error
+	CommitTransaction() error
+	RollbackTransaction() error
+}
+
+//go:generate mockgen -destination=../mocks/mock_uow_factory.go -package=mocks -mock_names=UoWFactory=MockUoWFactory . UoWFactory
+type UoWFactory interface {
+	Create() UnitOfWork
 }

@@ -123,7 +123,7 @@ func (m *mySqlMemeRepository) Create(meme entities.Meme) (uint, error) {
 func checkMemeConstraints(meme entities.Meme) error {
 	if len(meme.Title) > memeNameMaxLength {
 		return customErr.NewValidationError(
-			fmt.Errorf("meme title cannot contain more than %v symbols", usernameMaxLength))
+			fmt.Errorf("meme title cannot contain more than %v symbols", memeNameMaxLength))
 	}
 	return nil
 }

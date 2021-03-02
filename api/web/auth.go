@@ -26,6 +26,7 @@ func (s *apiServer) registerHandler (w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.As(err, &customErr.ValidationError{}) || errors.As(err, &customErr.ExistingResourceError{}) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -34,6 +35,7 @@ func (s *apiServer) registerHandler (w http.ResponseWriter, r *http.Request) {
 	token, err := s.jwt.CreateToken(int(u.ID), u.Role.Name)
 	if err != nil {
 		http.Error(w, "couldn't create jwt", http.StatusInternalServerError)
+		return
 	}
 	render.JSON(w, r, jwtResponse{Jwt: token})
 }
@@ -55,6 +57,7 @@ func (s *apiServer) loginHandler (w http.ResponseWriter, r *http.Request) {
 	token, err := s.jwt.CreateToken(int(u.ID), u.Role.Name)
 	if err != nil {
 		http.Error(w, "couldn't create jwt", http.StatusInternalServerError)
+		return
 	}
 	render.JSON(w, r, jwtResponse{Jwt: token})
 }

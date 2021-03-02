@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
@@ -31,9 +32,15 @@ func TestUserService_ValidateCredentials(t *testing.T) {
 
 	m := mocks.NewMockUserRepository(ctrl)
 	m.EXPECT().GetByUsername(gomock.Eq(user.Username)).Return(user, nil)
+	u := mocks.NewMockUnitOfWork(ctrl)
+	u.EXPECT().GetUserRepository().Return(m)
 
-	sut := userService{userRepository: m}
-	_, err = sut.ValidateCredentials(user.Username, plainTextPassword)
+	f := mocks.NewMockUoWFactory(ctrl)
+	f.EXPECT().Create().Return(u)
+
+
+	sut := userService{uowFactory: f}
+	_, err = sut.ValidateCredentials(context.Background(), user.Username, plainTextPassword)
 
 	if err != nil {
 		t.Errorf("expected no error but got: %v", err)
@@ -48,9 +55,14 @@ func TestUserService_ValidateCredentials_ShouldReturnErrIfNoUser(t *testing.T) {
 
 	m := mocks.NewMockUserRepository(ctrl)
 	m.EXPECT().GetByUsername(gomock.Eq(invalidUser)).Return(entities.User{}, errors.New("no user"))
+	u := mocks.NewMockUnitOfWork(ctrl)
+	u.EXPECT().GetUserRepository().Return(m)
 
-	sut := userService{userRepository: m}
-	_, err := sut.ValidateCredentials(invalidUser, "alabala")
+	f := mocks.NewMockUoWFactory(ctrl)
+	f.EXPECT().Create().Return(u)
+
+	sut := userService{uowFactory: f}
+	_, err := sut.ValidateCredentials(context.Background(), invalidUser, "alabala")
 
 	if err == nil {
 		t.Error("expected error but got nil")
@@ -72,9 +84,14 @@ func TestUserService_ValidateCredentials_ShouldReturnErrIfWrongPassword(t *testi
 
 	m := mocks.NewMockUserRepository(ctrl)
 	m.EXPECT().GetByUsername(gomock.Eq(user.Username)).Return(user, nil)
+	u := mocks.NewMockUnitOfWork(ctrl)
+	u.EXPECT().GetUserRepository().Return(m)
 
-	sut := userService{userRepository: m}
-	_, err := sut.ValidateCredentials(user.Username, plainTextPassword)
+	f := mocks.NewMockUoWFactory(ctrl)
+	f.EXPECT().Create().Return(u)
+
+	sut := userService{uowFactory: f}
+	_, err := sut.ValidateCredentials(context.Background(), user.Username, plainTextPassword)
 
 	if err == nil {
 		t.Errorf("expected error but got nil")
@@ -96,13 +113,20 @@ func TestUserService_Create(t *testing.T) {
 		PictureURL: "",
 	}
 
+
 	m := mocks.NewMockUserRepository(ctrl)
 	m.EXPECT().GetByUsername(gomock.Eq(user.Username)).Return(entities.User{}, gorm.ErrRecordNotFound)
 	m.EXPECT().Create(gomock.Eq(user)).Return(user.ID, nil)
 	m.EXPECT().Get(gomock.Eq(user.ID)).Return(user, nil)
 
-	sut := userService{userRepository: m}
-	_, err := sut.Create(user)
+	u := mocks.NewMockUnitOfWork(ctrl)
+	u.EXPECT().GetUserRepository().Return(m)
+
+	f := mocks.NewMockUoWFactory(ctrl)
+	f.EXPECT().Create().Return(u)
+
+	sut := userService{uowFactory: f}
+	_, err := sut.Create(context.Background(), user)
 
 	if err != nil {
 		t.Errorf("expected no error but got: %v", err)
@@ -128,8 +152,15 @@ func TestUserService_Create_ShouldReturnErrIfUserExists(t *testing.T) {
 	m.EXPECT().GetByUsername(gomock.Eq(user.Username)).
 		Return(entities.User{ ID: 4, Username: "admin"}, nil)
 
-	sut := userService{userRepository: m}
-	_, err := sut.Create(user)
+	u := mocks.NewMockUnitOfWork(ctrl)
+	u.EXPECT().GetUserRepository().Return(m)
+
+	f := mocks.NewMockUoWFactory(ctrl)
+	f.EXPECT().Create().Return(u)
+
+
+	sut := userService{uowFactory: f}
+	_, err := sut.Create(context.Background(), user)
 
 	if err == nil || !errors.As(err, &customErr.ExistingResourceError{}) {
 		t.Errorf("expected error but got nil or different one")
