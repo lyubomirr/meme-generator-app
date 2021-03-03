@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
 	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
-	"github.com/lyubomirr/meme-generator-app/core/repositories"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -49,10 +48,6 @@ func newUser(entity entities.User) dbUser {
 		RoleID:     entity.Role.ID,
 		PictureURL: entity.PictureURL,
 	}
-}
-
-func NewUserRepository() repositories.User {
-	return &mySqlUserRepository{db: getDB()}
 }
 
 type mySqlUserRepository struct {

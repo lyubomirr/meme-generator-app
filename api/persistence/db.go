@@ -47,6 +47,16 @@ func migrate() error {
 		return err
 	}
 
+	err = db.AutoMigrate(&dbTemplateTextPosition{})
+	if err != nil {
+		return err
+	}
+
+	err = db.AutoMigrate(&dbTemplate{})
+	if err != nil {
+		return err
+	}
+
 	err = db.AutoMigrate(&dbMeme{})
 	if err != nil {
 		return err

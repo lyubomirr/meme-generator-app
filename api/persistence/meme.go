@@ -1,10 +1,10 @@
 package persistence
 
 import (
+	"errors"
 	"fmt"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
 	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
-	"github.com/lyubomirr/meme-generator-app/core/repositories"
 	"gorm.io/gorm"
 )
 
@@ -19,6 +19,8 @@ type dbMeme struct {
 	Title    string `gorm:"type:varchar(50)"`
 	FilePath string
 	Comments []dbComment `gorm:"foreignKey:MemeID"`
+	TemplateID uint
+	Template dbTemplate
 }
 
 func (dbMeme) TableName() string {
@@ -37,6 +39,7 @@ func (m dbMeme) toEntity() entities.Meme {
 		Title:    m.Title,
 		FilePath: m.FilePath,
 		Comments: comments,
+		Template: m.Template.toEntity(),
 	}
 }
 
@@ -55,11 +58,8 @@ func newMeme(meme entities.Meme) dbMeme {
 		Title:    meme.Title,
 		FilePath: meme.FilePath,
 		Comments: commentsToDbModels(meme.Comments),
+		Template: newTemplate(meme.Template),
 	}
-}
-
-func NewMemeRepository() repositories.Meme {
-	return &mySqlMemeRepository{db: getDB()}
 }
 
 type mySqlMemeRepository struct {
@@ -121,6 +121,13 @@ func (m *mySqlMemeRepository) Create(meme entities.Meme) (uint, error) {
 }
 
 func checkMemeConstraints(meme entities.Meme) error {
+	if meme.Title == "" {
+		return customErr.NewValidationError(errors.New("meme title missing"))
+	}
+	if meme.FilePath == "" {
+		return customErr.NewValidationError(errors.New("meme filepath missing"))
+	}
+	//TODO: check for empty author
 	if len(meme.Title) > memeNameMaxLength {
 		return customErr.NewValidationError(
 			fmt.Errorf("meme title cannot contain more than %v symbols", memeNameMaxLength))

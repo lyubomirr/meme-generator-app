@@ -32,6 +32,7 @@ type Meme struct {
 	Title string
 	FilePath string
 	Comments []Comment
+	Template Template
 }
 
 type Comment struct {
@@ -45,4 +46,10 @@ type Template struct {
 	ID uint
 	Name string
 	FilePath string
+	TextPositions []TemplateTextPosition
+}
+
+type TemplateTextPosition struct {
+	TopOffset uint
+	LeftOffset uint
 }

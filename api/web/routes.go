@@ -19,5 +19,6 @@ func unAuthRouter(server *apiServer) http.Handler {
 	r := chi.NewRouter()
 	r.Post("/login", server.loginHandler)
 	r.Post("/register", server.registerHandler)
+	r.Post("/test", server.test)
 	return r
 }
