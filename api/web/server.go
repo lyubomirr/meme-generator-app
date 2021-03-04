@@ -8,10 +8,11 @@ import (
 
 type apiServer struct {
 	authService services.User
-	jwt *jwtHandler
+	memeService services.Meme
 }
 
 func Serve(address string) {
+	tokenHandler = initJwtHandler()
 	server := createServer()
 	router := constructRouter(server)
 	log.Fatal(http.ListenAndServe(address, router))

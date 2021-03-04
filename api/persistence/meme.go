@@ -1,26 +1,21 @@
 package persistence
 
 import (
-	"errors"
-	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
-	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
 	"gorm.io/gorm"
 )
 
-const (
-	memeNameMaxLength = 50
-)
-
 type dbMeme struct {
-	ID       uint
-	AuthorID uint
-	Author   dbUser
-	Title    string `gorm:"type:varchar(50)"`
-	FilePath string
-	Comments []dbComment `gorm:"foreignKey:MemeID"`
+	ID         uint
+	AuthorID   uint
+	Author     dbUser
+	Title      string `gorm:"type:varchar(50)"`
+	FilePath   string
+	MimeType   string      `gorm:"type:varchar(50)"`
+	Comments   []dbComment `gorm:"foreignKey:MemeID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	TemplateID uint
-	Template dbTemplate
+	Template   dbTemplate `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 func (dbMeme) TableName() string {
@@ -38,6 +33,7 @@ func (m dbMeme) toEntity() entities.Meme {
 		Author:   m.Author.toEntity(),
 		Title:    m.Title,
 		FilePath: m.FilePath,
+		MimeType: m.MimeType,
 		Comments: comments,
 		Template: m.Template.toEntity(),
 	}
@@ -57,13 +53,15 @@ func newMeme(meme entities.Meme) dbMeme {
 		AuthorID: meme.Author.ID,
 		Title:    meme.Title,
 		FilePath: meme.FilePath,
+		MimeType: meme.MimeType,
 		Comments: commentsToDbModels(meme.Comments),
 		Template: newTemplate(meme.Template),
 	}
 }
 
 type mySqlMemeRepository struct {
-	db *gorm.DB
+	db       *gorm.DB
+	validate *validator.Validate
 }
 
 func (m mySqlMemeRepository) GetAll() ([]entities.Meme, error) {
@@ -107,7 +105,7 @@ func (m *mySqlMemeRepository) GetByAuthor(userId uint) ([]entities.Meme, error) 
 }
 
 func (m *mySqlMemeRepository) Create(meme entities.Meme) (uint, error) {
-	err := checkMemeConstraints(meme)
+	err := m.validate.Struct(meme)
 	if err != nil {
 		return 0, err
 	}
@@ -120,23 +118,8 @@ func (m *mySqlMemeRepository) Create(meme entities.Meme) (uint, error) {
 	return model.ID, nil
 }
 
-func checkMemeConstraints(meme entities.Meme) error {
-	if meme.Title == "" {
-		return customErr.NewValidationError(errors.New("meme title missing"))
-	}
-	if meme.FilePath == "" {
-		return customErr.NewValidationError(errors.New("meme filepath missing"))
-	}
-	//TODO: check for empty author
-	if len(meme.Title) > memeNameMaxLength {
-		return customErr.NewValidationError(
-			fmt.Errorf("meme title cannot contain more than %v symbols", memeNameMaxLength))
-	}
-	return nil
-}
-
 func (m *mySqlMemeRepository) Update(meme entities.Meme) (entities.Meme, error) {
-	err := checkMemeConstraints(meme)
+	err := m.validate.Struct(meme)
 	if err != nil {
 		return entities.Meme{}, err
 	}

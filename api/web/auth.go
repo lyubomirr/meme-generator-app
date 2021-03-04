@@ -32,7 +32,7 @@ func (s *apiServer) registerHandler (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.jwt.CreateToken(int(u.ID), u.Role.Name)
+	token, err := tokenHandler.CreateToken(int(u.ID), u.Role.Name)
 	if err != nil {
 		http.Error(w, "couldn't create jwt", http.StatusInternalServerError)
 		return
@@ -54,7 +54,7 @@ func (s *apiServer) loginHandler (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.jwt.CreateToken(int(u.ID), u.Role.Name)
+	token, err := tokenHandler.CreateToken(int(u.ID), u.Role.Name)
 	if err != nil {
 		http.Error(w, "couldn't create jwt", http.StatusInternalServerError)
 		return

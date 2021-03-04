@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"errors"
+	"github.com/go-playground/validator/v10"
 	"github.com/lyubomirr/meme-generator-app/core/repositories"
 	"gorm.io/gorm"
 	"sync"
@@ -36,15 +37,15 @@ func (u *uow) getDb() *gorm.DB {
 }
 
 func (u *uow) GetUserRepository() repositories.User {
-	return &mySqlUserRepository{db: u.getDb()}
+	return &mySqlUserRepository{db: u.getDb(), validate: validator.New()}
 }
 
 func (u *uow) GetMemeRepository() repositories.Meme {
-	return &mySqlMemeRepository{db: u.getDb()}
+	return &mySqlMemeRepository{db: u.getDb(), validate: validator.New()}
 }
 
 func (u *uow) GetTemplateRepository() repositories.Template {
-	return &mySqlTemplateRepository{db: u.getDb()}
+	return &mySqlTemplateRepository{db: u.getDb(), validate: validator.New()}
 }
 
 func (u *uow) GetFileRepository() repositories.File {
@@ -71,7 +72,7 @@ func (u *uow) CommitTransaction() error {
 	defer u.txMux.Unlock()
 
 	if u.tx == nil {
-		return errors.New("no transaction")
+		return nil
 	}
 	db := u.tx.Commit()
 	u.tx = nil
@@ -85,7 +86,7 @@ func (u *uow) RollbackTransaction() error {
 	u.txMux.Lock()
 	defer u.txMux.Unlock()
 	if u.tx == nil {
-		return errors.New("no transaction")
+		return nil
 	}
 
 	db := u.tx.Rollback()

@@ -1,16 +1,10 @@
 package persistence
 
 import (
-	"errors"
-	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
-	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-)
-
-const (
-	memeTemplateNameMaxLength = 50
 )
 
 type dbTemplateTextPosition struct {
@@ -27,7 +21,8 @@ type dbTemplate struct {
 	ID       uint
 	Name    string `gorm:"type:varchar(50)"`
 	FilePath string
-	TextPositions []dbTemplateTextPosition `gorm:"foreignKey:TemplateID"`
+	MimeType string `gorm:"type:varchar(50)"`
+	TextPositions []dbTemplateTextPosition `gorm:"foreignKey:TemplateID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (dbTemplate) TableName() string {
@@ -45,11 +40,23 @@ func textPositionsToEntities(positions []dbTemplateTextPosition) []entities.Temp
 	return e
 }
 
+func newTextPositions(positions []entities.TemplateTextPosition) []dbTemplateTextPosition {
+	dbModels := make([]dbTemplateTextPosition, 0, len(positions))
+	for _, p := range positions {
+		dbModels = append(dbModels, dbTemplateTextPosition{
+			LeftOffset: p.LeftOffset,
+			TopOffset: p.TopOffset,
+		})
+	}
+	return dbModels
+}
+
 func (m dbTemplate) toEntity() entities.Template {
 	return entities.Template{
 		ID:       m.ID,
 		Name:     m.Name,
 		FilePath: m.FilePath,
+		MimeType: m.MimeType,
 		TextPositions: textPositionsToEntities(m.TextPositions),
 	}
 }
@@ -59,11 +66,14 @@ func newTemplate(template entities.Template) dbTemplate {
 		ID:       template.ID,
 		Name:     template.Name,
 		FilePath: template.FilePath,
+		MimeType: template.MimeType,
+		TextPositions: newTextPositions(template.TextPositions),
 	}
 }
 
 type mySqlTemplateRepository struct {
 	db *gorm.DB
+	validate *validator.Validate
 }
 
 func (m mySqlTemplateRepository) GetAll() ([]entities.Template, error) {
@@ -74,7 +84,7 @@ func (m mySqlTemplateRepository) GetAll() ([]entities.Template, error) {
 		return nil, result.Error
 	}
 
-	var entities = make([]entities.Template, 0, len(templates))
+	entities := make([]entities.Template, 0, len(templates))
 	for _, t := range templates {
 		entities = append(entities, t.toEntity())
 	}
@@ -93,7 +103,7 @@ func (m mySqlTemplateRepository) Get(id uint) (entities.Template, error) {
 }
 
 func (m mySqlTemplateRepository) Create(template entities.Template) (uint, error) {
-	err := checkTemplateConstraints(template)
+	err := m.validate.Struct(template)
 	if err != nil {
 		return 0, err
 	}
@@ -106,25 +116,8 @@ func (m mySqlTemplateRepository) Create(template entities.Template) (uint, error
 	return model.ID, nil
 }
 
-func checkTemplateConstraints(template entities.Template) error {
-	if template.Name == "" {
-		return customErr.NewValidationError(errors.New("template name is empty"))
-	}
-	if template.FilePath == "" {
-		return customErr.NewValidationError(errors.New("filepath is empty"))
-	}
-	if len(template.TextPositions) == 0 {
-		return customErr.NewValidationError(errors.New("you must specify at least one position for inserting text"))
-	}
-	if len(template.Name) > memeTemplateNameMaxLength {
-		return customErr.NewValidationError(
-			fmt.Errorf("template name cannot contain more than %v symbols", memeTemplateNameMaxLength))
-	}
-	return nil
-}
-
 func (m mySqlTemplateRepository) Update(template entities.Template) (entities.Template, error) {
-	err := checkTemplateConstraints(template)
+	err := m.validate.Struct(template)
 	if err != nil {
 		return entities.Template{}, err
 	}

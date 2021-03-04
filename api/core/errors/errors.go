@@ -16,7 +16,6 @@ func NewAuthError(inner error) AuthError {
 	return AuthError{Err: inner}
 }
 
-
 type ExistingResourceError struct {
 	Err error
 }
@@ -39,4 +38,16 @@ func (a ValidationError) Error() string {
 
 func NewValidationError(inner error) ValidationError {
 	return ValidationError{Err: inner}
+}
+
+type RightsError struct {
+	Err error
+}
+
+func (a RightsError) Error() string {
+	return fmt.Sprintf("Unsufficient rights: %v", a.Err)
+}
+
+func NewRightsError(inner error) RightsError {
+	return RightsError{Err: inner}
 }

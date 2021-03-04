@@ -1,11 +1,28 @@
 package main
 
+import "github.com/lyubomirr/meme-generator-app/web"
+
 func main() {
-	//web.Serve(":8080")
-i
-	//r := persistence.NewMemeRepository()
+	web.Serve(":8080")
+	//t := entities.Template{
+	//	Name:          "pesho",
+	//	FilePath:      "asd.png",
+	//	TextPositions: []entities.TemplateTextPosition{{
+	//		TopOffset:  10,
+	//		LeftOffset: 20,
+	//	}},
+	//	MimeType: "alabala",
+	//}
+	//s := services.NewMemeService(persistence.NewUnitOfWorkFactory())
+	//r, err := s.CreateTemplate(context.Background(), []byte{1,2,3,4}, t)
+	//fmt.Println(r)
+	//
+	//err = s.DeleteTemplate(context.Background(), r.ID)
+	//fmt.Println(err)
+	//_, err := s.Create(context.Background(), []byte {2,3,4,5}, entities.Meme{})
+	//fmt.Print(err)
 	//m, _ := r.Get(1)
-	//m.Comments = append(m.Comments, entities.Comment{
+	//m.Comments = append(m.Comments, entities.Comments{
 	//	Author:  entities.User{ ID: 1},
 	//	Content: "nov komentar",
 	//})

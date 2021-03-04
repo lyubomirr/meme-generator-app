@@ -3,16 +3,12 @@ package persistence
 import (
 	"errors"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
 	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-)
-
-const (
-	usernameMaxLength = 25
-	minPasswordLength = 8
 )
 
 type dbUser struct {
@@ -22,8 +18,8 @@ type dbUser struct {
 	RoleID     uint
 	Role       dbRole
 	PictureURL string
-	Memes      []dbMeme    `gorm:"foreignKey:AuthorID"`
-	Comment    []dbComment `gorm:"foreignKey:AuthorID"`
+	Memes      []dbMeme    `gorm:"foreignKey:AuthorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Comments   []dbComment `gorm:"foreignKey:AuthorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (dbUser) TableName() string {
@@ -52,6 +48,7 @@ func newUser(entity entities.User) dbUser {
 
 type mySqlUserRepository struct {
 	db *gorm.DB
+	validate *validator.Validate
 }
 
 func (m *mySqlUserRepository) Get(id uint) (entities.User, error) {
@@ -80,7 +77,7 @@ func (m *mySqlUserRepository) GetByUsername(username string) (entities.User, err
 }
 
 func (m *mySqlUserRepository) Create(user entities.User) (uint, error) {
-	err := checkUserConstraints(user)
+	err := m.validate.Struct(user)
 	if err != nil {
 		return 0, err
 	}
@@ -107,20 +104,6 @@ func (m *mySqlUserRepository) Create(user entities.User) (uint, error) {
 	return model.ID, nil
 }
 
-func checkUserConstraints(user entities.User) error {
-	if len(user.Username) > usernameMaxLength {
-		return customErr.NewValidationError(
-			fmt.Errorf("username length cannot contain more than %v symbols", usernameMaxLength))
-	}
-
-	if len(user.Password) < minPasswordLength {
-		return customErr.NewValidationError(
-			fmt.Errorf(fmt.Sprintf("password should contain at least %v symbols", minPasswordLength)))
-	}
-
-	return nil
-}
-
 func (m *mySqlUserRepository) Update(user entities.User) (entities.User, error) {
 	var dbUser dbUser
 	result := m.db.First(&dbUser, user.ID)
@@ -128,15 +111,19 @@ func (m *mySqlUserRepository) Update(user entities.User) (entities.User, error) 
 		return entities.User{}, result.Error
 	}
 
+	err := m.validate.StructPartial(user, "Role.ID")
+	if err != nil {
+		return entities.User{}, err
+	}
+
 	dbUser.RoleID = user.Role.ID
 	dbUser.PictureURL = user.PictureURL
 
-	if dbUser.Password != user.Password {
+	if user.Password != "" && dbUser.Password != user.Password {
 		//A new password is set - validate length and hash
-		if len(user.Password) < minPasswordLength {
-			return entities.User{},
-				customErr.NewValidationError(
-					fmt.Errorf("password should contain at least %v symbols", minPasswordLength))
+		err = m.validate.StructPartial(user, "Password")
+		if err != nil {
+			return entities.User{}, err
 		}
 
 		hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

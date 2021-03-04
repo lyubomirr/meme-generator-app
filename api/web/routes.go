@@ -12,6 +12,7 @@ func constructRouter(server *apiServer) chi.Router {
 	r.Use(middleware.Recoverer)
 
 	r.Mount("/", unAuthRouter(server))
+	r.Mount("/auth", authRouter(server))
 	return r
 }
 
@@ -19,6 +20,12 @@ func unAuthRouter(server *apiServer) http.Handler {
 	r := chi.NewRouter()
 	r.Post("/login", server.loginHandler)
 	r.Post("/register", server.registerHandler)
-	r.Post("/test", server.test)
+	return r
+}
+
+func authRouter(server *apiServer) http.Handler {
+	r := chi.NewRouter()
+	r.Use(ValidateJwtMiddleware)
+	r.Get("/test", server.test)
 	return r
 }
