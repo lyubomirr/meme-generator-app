@@ -17,8 +17,13 @@ func initJwtHandler() *jwtHandler {
 
 func createServer() *apiServer {
 	uowFactory := persistence.NewUnitOfWorkFactory()
-	authService := services.NewUserService(uowFactory)
+	userService := services.NewUserService(uowFactory)
 	memeService := services.NewMemeService(uowFactory)
+	templateService := services.NewTemplateService(uowFactory)
 
-	return &apiServer{authService: authService, memeService: memeService}
+	return &apiServer{
+		userService:     userService,
+		memeService:     memeService,
+		templateService: templateService,
+	}
 }

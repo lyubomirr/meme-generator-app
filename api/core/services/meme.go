@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
 	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
 	"github.com/lyubomirr/meme-generator-app/core/repositories"
+	"path"
 )
 
 type Meme interface {
@@ -17,8 +19,6 @@ type Meme interface {
 	AddComment(ctx context.Context, memeID uint, comment entities.Comment) (entities.Meme, error)
 	DeleteComment(ctx context.Context, memeID uint, commentId uint) (entities.Meme, error)
 	Delete(ctx context.Context, id uint) error
-	CreateTemplate(ctx context.Context, file []byte, template entities.Template) (entities.Template, error)
-	DeleteTemplate(ctx context.Context, id uint) error
 }
 
 func NewMemeService(uowFactory repositories.UoWFactory) Meme {
@@ -74,6 +74,15 @@ func (m *memeService) Create(ctx context.Context, file []byte, meme entities.Mem
 			}
 		}
 	}()
+
+	mimeType, err := getMimeType(file)
+	if err != nil {
+		return entities.Meme{}, err
+	}
+	fileName := fmt.Sprintf("%v%v", uuid.NewString(), getFileExtension(mimeType))
+
+	meme.MimeType = mimeType
+	meme.FilePath = path.Join(memeFilesPath, fileName)
 
 	err = uow.BeginTransaction()
 	if err != nil {
@@ -131,7 +140,6 @@ func (m *memeService) AddComment(ctx context.Context, memeID uint, comment entit
 }
 
 func (m *memeService) DeleteComment(ctx context.Context, memeID uint, commentId uint) (entities.Meme, error) {
-	//TODO: check rights
 	uow := m.uowFactory.Create()
 	memes := uow.GetMemeRepository()
 
@@ -152,6 +160,16 @@ func (m *memeService) DeleteComment(ctx context.Context, memeID uint, commentId 
 		return entities.Meme{}, customErr.NewValidationError(errors.New("no such comment"))
 	}
 
+	userId, err := getUserId(ctx)
+	if err != nil {
+		return entities.Meme{}, err
+	}
+
+	if meme.Comments[commentIdx].Author.ID != userId {
+		return entities.Meme{},
+		customErr.NewRightsError(errors.New("cannot delete comment that does not belong to the user"))
+	}
+
 	meme.Comments = append(meme.Comments[:commentIdx], meme.Comments[commentIdx+1:]...)
 	meme, err = memes.Update(meme)
 	if err != nil {
@@ -161,7 +179,6 @@ func (m *memeService) DeleteComment(ctx context.Context, memeID uint, commentId 
 }
 
 func (m *memeService) Delete(ctx context.Context, id uint) (err error) {
-	//TODO: check rights
 	uow := m.uowFactory.Create()
 	defer func() {
 		if r := recover(); r != nil {
@@ -185,6 +202,15 @@ func (m *memeService) Delete(ctx context.Context, id uint) (err error) {
 		return tryRollback(uow, err)
 	}
 
+	userId, err := getUserId(ctx)
+	if err != nil {
+		return tryRollback(uow, err)
+	}
+
+	if userId != meme.Author.ID {
+		return customErr.NewRightsError(errors.New("cannot delete meme that does not belong to the user"))
+	}
+
 	err = memes.Delete(id)
 	if err != nil {
 		return tryRollback(uow, err)
@@ -192,99 +218,6 @@ func (m *memeService) Delete(ctx context.Context, id uint) (err error) {
 
 	fileRepo := uow.GetFileRepository()
 	err = fileRepo.Delete(meme.FilePath)
-	if err != nil {
-		return tryRollback(uow, err)
-	}
-
-	err = uow.CommitTransaction()
-	if err != nil {
-		return tryRollback(uow, err)
-	}
-	return
-}
-
-func (m *memeService) CreateTemplate(
-	ctx context.Context, file []byte, template entities.Template) (result entities.Template, err error) {
-
-	if !isAdministrator(ctx) {
-		return entities.Template{}, customErr.NewRightsError(errors.New("user is not administrator"))
-	}
-
-	uow := m.uowFactory.Create()
-	defer func() {
-		if r := recover(); r != nil {
-			err = uow.RollbackTransaction()
-			if err != nil {
-				err = fmt.Errorf("failed to rollback on panic: %v", r)
-			} else  {
-				err = fmt.Errorf("panic: %v", r)
-			}
-		}
-	}()
-
-	err = uow.BeginTransaction()
-	if err != nil {
-		return
-	}
-
-	templates := uow.GetTemplateRepository()
-	id, err := templates.Create(template)
-	if err != nil {
-		err = tryRollback(uow, err)
-		return
-	}
-
-	fileRepo := uow.GetFileRepository()
-	err = fileRepo.Save(file, template.FilePath)
-	if err != nil {
-		err = tryRollback(uow, err)
-		return
-	}
-
-	err = uow.CommitTransaction()
-	if err != nil {
-		err = tryRollback(uow, err)
-		return
-	}
-
-	templates = uow.GetTemplateRepository()
-	result, err = templates.Get(id)
-	return
-}
-
-func (m *memeService) DeleteTemplate(ctx context.Context, id uint) (err error) {
-	//TODO: check rights
-	uow := m.uowFactory.Create()
-	defer func() {
-		if r := recover(); r != nil {
-			err = uow.RollbackTransaction()
-			if err != nil {
-				err = fmt.Errorf("failed to rollback on panic: %v", r)
-			} else  {
-				err = fmt.Errorf("panic: %v", r)
-			}
-		}
-	}()
-
-	err = uow.BeginTransaction()
-	if err != nil {
-		return err
-	}
-
-	templates := uow.GetTemplateRepository()
-	template, err := templates.Get(id)
-	if err != nil {
-		return tryRollback(uow, err)
-	}
-
-	err = templates.Delete(id)
-	if err != nil {
-		return tryRollback(uow, err)
-	}
-	//return tryRollback(uow, err)
-
-	fileRepo := uow.GetFileRepository()
-	err = fileRepo.Delete(template.FilePath)
 	if err != nil {
 		return tryRollback(uow, err)
 	}

@@ -26,6 +26,7 @@ type userService struct {
 
 func (a *userService) ValidateCredentials(
 	ctx context.Context, username string, password string) (entities.User, error) {
+
 	uow := a.uowFactory.Create()
 	repo := uow.GetUserRepository()
 
@@ -42,16 +43,19 @@ func (a *userService) ValidateCredentials(
 }
 
 func (a *userService) Create(ctx context.Context, user entities.User) (entities.User, error) {
+	if user.Role.ID == entities.AdminRoleId && !IsAdministrator(ctx) {
+		return entities.User{}, customErr.NewRightsError(errors.New("cannot create admin user if not admin"))
+	}
+
 	uow := a.uowFactory.Create()
 	repo := uow.GetUserRepository()
 
 	u, err := repo.GetByUsername(user.Username)
 	if err == nil {
-		return entities.User{}, customErr.NewExistingResourceError(
+		return entities.User{}, customErr.NewValidationError(
 			errors.New(fmt.Sprintf("User with name %v already exists", user.Username)))
 	}
 
-	//TODO: ADD CHECK FOR ADMIN
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return entities.User{}, err
 	}

@@ -9,22 +9,32 @@ import (
 
 const Bearer = "Bearer "
 
-func ValidateJwtMiddleware(next http.Handler) http.Handler {
+func validateJwtMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if !strings.HasPrefix(authHeader, Bearer) {
-			http.Error(w, "invalid jwt", http.StatusUnauthorized)
+			createErrorResponse(w, "invalid jwt", http.StatusUnauthorized)
 			return
 		}
 
 		jwt := authHeader[len(Bearer):]
 		claims, err := tokenHandler.ValidateToken(jwt)
 		if err != nil {
-			http.Error(w, "invalid jwt", http.StatusUnauthorized)
+			createErrorResponse(w, "invalid jwt", http.StatusUnauthorized)
 			return
 		}
 
 		ctx := context.WithValue(r.Context(), services.UserClaimsKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func adminOnlyMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !services.IsAdministrator(r.Context()) {
+			createErrorResponse(w, "administrator only endpoint", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }

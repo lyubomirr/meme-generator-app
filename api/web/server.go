@@ -7,8 +7,9 @@ import (
 )
 
 type apiServer struct {
-	authService services.User
-	memeService services.Meme
+	userService     services.User
+	memeService     services.Meme
+	templateService services.Template
 }
 
 func Serve(address string) {

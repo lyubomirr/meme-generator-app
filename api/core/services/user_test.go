@@ -162,7 +162,7 @@ func TestUserService_Create_ShouldReturnErrIfUserExists(t *testing.T) {
 	sut := userService{uowFactory: f}
 	_, err := sut.Create(context.Background(), user)
 
-	if err == nil || !errors.As(err, &customErr.ExistingResourceError{}) {
+	if err == nil || !errors.As(err, &customErr.ValidationError{}) {
 		t.Errorf("expected error but got nil or different one")
 	}
 }

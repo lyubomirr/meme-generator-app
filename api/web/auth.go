@@ -1,10 +1,8 @@
 package web
 
 import (
-	"errors"
 	"github.com/go-chi/render"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
-	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
 	"net/http"
 )
 
@@ -12,52 +10,58 @@ func (s *apiServer) registerHandler (w http.ResponseWriter, r *http.Request) {
 	var model registrationModel
 	err := render.DecodeJSON(r.Body, &model)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		createErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if model.Password != model.ConfirmPassword {
-		http.Error(w, "Password does not match.", http.StatusBadRequest)
+		createErrorResponse(w, "Password does not match.", http.StatusBadRequest)
 		return
 	}
 
 	model.User.Role = entities.Role{ID: entities.NormalRoleId}
-	u, err := s.authService.Create(r.Context(), model.User)
+	u, err := s.userService.Create(r.Context(), model.User)
 	if err != nil {
-		if errors.As(err, &customErr.ValidationError{}) || errors.As(err, &customErr.ExistingResourceError{}) {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleServiceError(w, err)
 		return
 	}
 
 	token, err := tokenHandler.CreateToken(int(u.ID), u.Role.Name)
 	if err != nil {
-		http.Error(w, "couldn't create jwt", http.StatusInternalServerError)
+		createErrorResponse(w, "couldn't create jwt", http.StatusInternalServerError)
 		return
 	}
-	render.JSON(w, r, jwtResponse{Jwt: token})
+
+	render.JSON(w, r, loginResponse{
+		Jwt: token,
+		Username: u.Username,
+		Role: u.Role.Name,
+	})
 }
 
 func (s *apiServer) loginHandler (w http.ResponseWriter, r *http.Request) {
 	var model loginCredentials
 	err := render.DecodeJSON(r.Body, &model)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		createErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	u, err := s.authService.ValidateCredentials(r.Context(), model.Username, model.Password)
+	u, err := s.userService.ValidateCredentials(r.Context(), model.Username, model.Password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		handleServiceError(w, err)
 		return
 	}
 
 	token, err := tokenHandler.CreateToken(int(u.ID), u.Role.Name)
 	if err != nil {
-		http.Error(w, "couldn't create jwt", http.StatusInternalServerError)
+		createErrorResponse(w, "couldn't create jwt", http.StatusInternalServerError)
 		return
 	}
-	render.JSON(w, r, jwtResponse{Jwt: token})
+
+	render.JSON(w, r, loginResponse{
+		Jwt: token,
+		Username: u.Username,
+		Role: u.Role.Name,
+	})
 }

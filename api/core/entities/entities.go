@@ -1,5 +1,7 @@
 package entities
 
+import "time"
+
 type RoleName string
 
 const (
@@ -18,40 +20,46 @@ type Role struct {
 }
 
 type User struct {
-	ID         uint
-	Username   string `validate:"required,max=25"`
-	Password   string `validate:"required,min=8"`
-	Role       Role   `validate:"required"`
-	PictureURL string
-	Memes      []Meme
+	ID         uint   `json:"id"`
+	Username   string `json:"username" validate:"required,max=25"`
+	Password   string `json:"-" validate:"required,min=8"`
+	RoleID     uint   `json:"roleId" validate:"required"`
+	Role       Role   `json:"role" validate:"-"`
+	Memes      []Meme `json:"memes,omitempty"`
 }
 
 type Meme struct {
-	ID       uint
-	Author   User   `validate:"required"`
-	Title    string `validate:"required,max=50"`
-	FilePath string `validate:"required"`
-	MimeType string `validate:"required,max=50`
-	Comments []Comment
-	Template Template
+	ID         uint      `json:"id"`
+	AuthorID   uint      `json:"authorId" validate:"required"`
+	Author     User      `json:"author" validate:"-"`
+	Title      string    `json:"title" validate:"required,max=50"`
+	FilePath   string    `json:"-" validate:"required"`
+	MimeType   string    `json:"mimeType" validate:"required,max=50`
+	CreatedAt  time.Time `json:"createdAt"`
+	Comments   []Comment `json:"comments,omitempty"`
+	TemplateID uint      `json:"templateId"`
+	Template   Template  `json:"template" validate:"-"`
 }
 
 type Comment struct {
-	ID      uint
-	Author  User   `validate:"required"`
-	MemeID  uint   `validate:"required"`
-	Content string `validate:"required,max=50"`
+	ID        uint      `json:"id"`
+	AuthorID  uint      `json:"authorId" validate:"required"`
+	Author    User      `json:"author" validate:"-"`
+	MemeID    uint      `json:"memeId" validate:"required"`
+	Content   string    `json:"content" validate:"required,max=50"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Template struct {
-	ID            uint
-	Name          string                 `validate:"required,max=50"`
-	FilePath      string                 `validate:"required"`
-	MimeType      string                 `validate:"required,max=50`
-	TextPositions []TemplateTextPosition `validate:"required"`
+	ID            uint                   `json:"id"`
+	Name          string                 `json:"name" validate:"required,max=50"`
+	FilePath      string                 `json:"-" validate:"required"`
+	MimeType      string                 `json:"mimeType" validate:"required,max=50`
+	TextPositions []TemplateTextPosition `json:"textPositions" validate:"required"`
+	CreatedAt     time.Time
 }
 
 type TemplateTextPosition struct {
-	TopOffset  uint
-	LeftOffset uint
+	TopOffset  uint `json:"topOffset"`
+	LeftOffset uint `json:"leftOffset"`
 }

@@ -32,7 +32,6 @@ func (u dbUser) toEntity() entities.User {
 		Username:   u.Username,
 		Password:   u.Password,
 		Role:       u.Role.toEntity(),
-		PictureURL: u.PictureURL,
 	}
 }
 
@@ -42,7 +41,6 @@ func newUser(entity entities.User) dbUser {
 		Username:   entity.Username,
 		Password:   entity.Password,
 		RoleID:     entity.Role.ID,
-		PictureURL: entity.PictureURL,
 	}
 }
 
@@ -84,7 +82,7 @@ func (m *mySqlUserRepository) Create(user entities.User) (uint, error) {
 
 	_, err = m.GetByUsername(user.Username)
 	if err == nil {
-		return 0, customErr.ExistingResourceError{
+		return 0, customErr.ValidationError{
 			Err: errors.New(fmt.Sprintf("User with name %v already exists", user.Username)),
 		}
 	}
@@ -117,7 +115,6 @@ func (m *mySqlUserRepository) Update(user entities.User) (entities.User, error) 
 	}
 
 	dbUser.RoleID = user.Role.ID
-	dbUser.PictureURL = user.PictureURL
 
 	if user.Password != "" && dbUser.Password != user.Password {
 		//A new password is set - validate length and hash
@@ -133,7 +130,7 @@ func (m *mySqlUserRepository) Update(user entities.User) (entities.User, error) 
 		dbUser.Password = string(hashed)
 	}
 
-	result = m.db.Save(dbUser)
+	result = m.db.Save(&dbUser)
 	if result.Error != nil {
 		return entities.User{}, result.Error
 	}

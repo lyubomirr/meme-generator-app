@@ -5,6 +5,7 @@ import (
 	"github.com/lyubomirr/meme-generator-app/core/entities"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"time"
 )
 
 type dbTemplateTextPosition struct {
@@ -23,6 +24,7 @@ type dbTemplate struct {
 	FilePath string
 	MimeType string `gorm:"type:varchar(50)"`
 	TextPositions []dbTemplateTextPosition `gorm:"foreignKey:TemplateID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	CreatedAt time.Time
 }
 
 func (dbTemplate) TableName() string {
@@ -58,6 +60,7 @@ func (m dbTemplate) toEntity() entities.Template {
 		FilePath: m.FilePath,
 		MimeType: m.MimeType,
 		TextPositions: textPositionsToEntities(m.TextPositions),
+		CreatedAt: m.CreatedAt,
 	}
 }
 
@@ -68,6 +71,7 @@ func newTemplate(template entities.Template) dbTemplate {
 		FilePath: template.FilePath,
 		MimeType: template.MimeType,
 		TextPositions: newTextPositions(template.TextPositions),
+		CreatedAt: template.CreatedAt,
 	}
 }
 
@@ -78,7 +82,10 @@ type mySqlTemplateRepository struct {
 
 func (m mySqlTemplateRepository) GetAll() ([]entities.Template, error) {
 	var templates []dbTemplate
-	result := withReadTimeout(m.db).Preload(clause.Associations).Find(&templates)
+	result := withReadTimeout(m.db).
+		Preload(clause.Associations).
+		Order("created_at desc").
+		Find(&templates)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -129,7 +136,7 @@ func (m mySqlTemplateRepository) Update(template entities.Template) (entities.Te
 	}
 
 	dbTemplate = newTemplate(template)
-	result = m.db.Save(dbTemplate)
+	result = m.db.Save(&dbTemplate)
 	if result.Error != nil {
 		return entities.Template{}, result.Error
 	}

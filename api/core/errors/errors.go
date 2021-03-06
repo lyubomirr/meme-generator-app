@@ -16,18 +16,6 @@ func NewAuthError(inner error) AuthError {
 	return AuthError{Err: inner}
 }
 
-type ExistingResourceError struct {
-	Err error
-}
-
-func (a ExistingResourceError) Error() string {
-	return fmt.Sprintf("Resource already exists: %v", a.Err)
-}
-
-func NewExistingResourceError(inner error) ExistingResourceError {
-	return ExistingResourceError{Err: inner}
-}
-
 type ValidationError struct {
 	Err error
 }

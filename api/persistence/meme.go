@@ -1,9 +1,11 @@
 package persistence
 
 import (
+	"database/sql"
 	"github.com/go-playground/validator/v10"
 	"github.com/lyubomirr/meme-generator-app/core/entities"
 	"gorm.io/gorm"
+	"time"
 )
 
 type dbMeme struct {
@@ -14,8 +16,9 @@ type dbMeme struct {
 	FilePath   string
 	MimeType   string      `gorm:"type:varchar(50)"`
 	Comments   []dbComment `gorm:"foreignKey:MemeID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TemplateID uint
+	TemplateID sql.NullInt64
 	Template   dbTemplate `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	CreatedAt time.Time
 }
 
 func (dbMeme) TableName() string {
@@ -30,12 +33,15 @@ func (m dbMeme) toEntity() entities.Meme {
 
 	return entities.Meme{
 		ID:       m.ID,
+		AuthorID: m.AuthorID,
 		Author:   m.Author.toEntity(),
 		Title:    m.Title,
 		FilePath: m.FilePath,
 		MimeType: m.MimeType,
 		Comments: comments,
+		TemplateID: uint(m.TemplateID.Int64),
 		Template: m.Template.toEntity(),
+		CreatedAt: m.CreatedAt,
 	}
 }
 
@@ -50,12 +56,17 @@ func memesToEntities(dbMemes []dbMeme) []entities.Meme {
 func newMeme(meme entities.Meme) dbMeme {
 	return dbMeme{
 		ID:       meme.ID,
-		AuthorID: meme.Author.ID,
+		AuthorID: meme.AuthorID,
 		Title:    meme.Title,
 		FilePath: meme.FilePath,
 		MimeType: meme.MimeType,
 		Comments: commentsToDbModels(meme.Comments),
+		TemplateID: sql.NullInt64{
+			Int64: int64(meme.TemplateID),
+			Valid: meme.TemplateID != 0,
+		},
 		Template: newTemplate(meme.Template),
+		CreatedAt: meme.CreatedAt,
 	}
 }
 
@@ -66,7 +77,7 @@ type mySqlMemeRepository struct {
 
 func (m mySqlMemeRepository) GetAll() ([]entities.Meme, error) {
 	var memes []dbMeme
-	result := preloadMemes(m.db).Find(&memes)
+	result := preloadMemes(m.db).Order("created_at desc").Find(&memes)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -78,7 +89,10 @@ func (m mySqlMemeRepository) GetAll() ([]entities.Meme, error) {
 func preloadMemes(db *gorm.DB) *gorm.DB {
 	return withReadTimeout(db).
 		Preload("Author").
-		Preload("Comments").
+		Preload("Template").
+		Preload("Comments", func(db *gorm.DB) *gorm.DB {
+			return db.Order("comments.created_at desc")
+		}).
 		Preload("Comments.Author")
 }
 
@@ -131,7 +145,7 @@ func (m *mySqlMemeRepository) Update(meme entities.Meme) (entities.Meme, error) 
 	}
 
 	dbMeme = newMeme(meme)
-	result = m.db.Save(dbMeme)
+	result = m.db.Save(&dbMeme)
 	if result.Error != nil {
 		return entities.Meme{}, result.Error
 	}

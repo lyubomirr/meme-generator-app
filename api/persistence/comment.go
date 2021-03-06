@@ -1,6 +1,9 @@
 package persistence
 
-import "github.com/lyubomirr/meme-generator-app/core/entities"
+import (
+	"github.com/lyubomirr/meme-generator-app/core/entities"
+	"time"
+)
 
 type dbComment struct {
 	ID       uint
@@ -8,6 +11,7 @@ type dbComment struct {
 	Author   dbUser
 	MemeID   uint
 	Content  string `gorm:"type:varchar(300)"`
+	CreatedAt time.Time
 }
 
 func (dbComment) TableName() string {
@@ -17,9 +21,11 @@ func (dbComment) TableName() string {
 func (c dbComment) toEntity() entities.Comment {
 	return entities.Comment{
 		ID:      c.ID,
+		AuthorID: c.AuthorID,
 		Author:  c.Author.toEntity(),
 		Content: c.Content,
 		MemeID:  c.MemeID,
+		CreatedAt: c.CreatedAt,
 	}
 }
 
@@ -28,9 +34,10 @@ func commentsToDbModels(comments []entities.Comment) []dbComment {
 	for _,c := range comments {
 		dbModels = append(dbModels, dbComment{
 			ID:       c.ID,
-			AuthorID: c.Author.ID,
+			AuthorID: c.AuthorID,
 			MemeID:   c.MemeID,
 			Content:  c.Content,
+			CreatedAt: c.CreatedAt,
 		})
 	}
 	return dbModels
