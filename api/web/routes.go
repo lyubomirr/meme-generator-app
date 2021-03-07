@@ -11,8 +11,10 @@ func constructRouter(server *apiServer) chi.Router {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Mount("/", unAuthRouter(server))
-	r.Mount("/auth", authRouter(server))
+	r.Route("/api", func(r chi.Router) {
+		r.Mount("/", unAuthRouter(server))
+		r.Mount("/auth", authRouter(server))
+	})
 	return r
 }
 
@@ -20,6 +22,9 @@ func unAuthRouter(server *apiServer) http.Handler {
 	r := chi.NewRouter()
 	r.Post("/login", server.loginHandler)
 	r.Post("/register", server.registerHandler)
+	r.Get("/template/file/{id}", server.getTemplateFileHandler)
+	r.Get("/meme/file/{id}", server.getMemeFileHandler)
+
 	return r
 }
 
@@ -31,7 +36,6 @@ func authRouter(server *apiServer) http.Handler {
 	r.Route("/template", func(r chi.Router) {
 		r.Get("/", server.getTemplatesHandler)
 		r.Get("/{id}", server.getTemplateHandler)
-		r.Get("/file/{id}", server.getTemplateFileHandler)
 	})
 
 	r.Route("/meme", func(r chi.Router) {
@@ -39,7 +43,6 @@ func authRouter(server *apiServer) http.Handler {
 		r.Post("/", server.addMemeHandler)
 		r.Get("/{id}", server.getMemeHandler)
 		r.Delete("/{id}", server.deleteMemeHandler)
-		r.Get("/file/{id}", server.getMemeFileHandler)
 		r.Post("/{id}/comment", server.addCommentHandler)
 		r.Delete("/{memeId}/comment/{commentId}", server.deleteCommentHandler)
 	})

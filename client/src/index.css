@@ -1,4 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+@font-face {
+    font-family: Impact;
+    src: url('impact.ttf');
+}
+
 :root {
     --main-color: #4abdac;
     --second-color: #fc4a1a;
@@ -35,4 +40,38 @@ html {
 
 .login-component {
     padding: 2rem;
+}
+
+.custom-toast {
+    font-size: 0.9rem;
+}
+
+.main-container {
+    padding: 2rem;
+}
+
+.register-link {
+    line-height: 2.5rem;
+}
+
+.template-img {
+    display: block;
+    margin: 0 auto;
+    width: 90%;
+}
+
+.canvas-container {
+    margin: 0 auto;
+}
+
+.new-meme-form-wrapper {
+    background-color: white;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-meme-form-wrapper form {
+    width: 90%;
 }

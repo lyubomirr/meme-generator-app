@@ -86,8 +86,6 @@ func (t *templateService) Create(
 		return
 	}
 
-
-
 	fileRepo := uow.GetFileRepository()
 	err = fileRepo.Save(file, template.FilePath)
 	if err != nil {

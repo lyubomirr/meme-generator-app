@@ -65,7 +65,6 @@ func newMeme(meme entities.Meme) dbMeme {
 			Int64: int64(meme.TemplateID),
 			Valid: meme.TemplateID != 0,
 		},
-		Template: newTemplate(meme.Template),
 		CreatedAt: meme.CreatedAt,
 	}
 }

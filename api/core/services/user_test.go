@@ -27,7 +27,6 @@ func TestUserService_ValidateCredentials(t *testing.T) {
 		Username:   "admin",
 		Password:   string(hashedPassword),
 		Role:       entities.Role{},
-		PictureURL: "",
 	}
 
 	m := mocks.NewMockUserRepository(ctrl)
@@ -79,7 +78,6 @@ func TestUserService_ValidateCredentials_ShouldReturnErrIfWrongPassword(t *testi
 		Username:   "admin",
 		Password:   "differenthash",
 		Role:       entities.Role{},
-		PictureURL: "",
 	}
 
 	m := mocks.NewMockUserRepository(ctrl)
@@ -110,9 +108,7 @@ func TestUserService_Create(t *testing.T) {
 			ID: 4,
 			Name: "alabala",
 		},
-		PictureURL: "",
 	}
-
 
 	m := mocks.NewMockUserRepository(ctrl)
 	m.EXPECT().GetByUsername(gomock.Eq(user.Username)).Return(entities.User{}, gorm.ErrRecordNotFound)
@@ -145,7 +141,6 @@ func TestUserService_Create_ShouldReturnErrIfUserExists(t *testing.T) {
 			ID: 4,
 			Name: "alabala",
 		},
-		PictureURL: "",
 	}
 
 	m := mocks.NewMockUserRepository(ctrl)

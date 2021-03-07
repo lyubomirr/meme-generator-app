@@ -7,6 +7,7 @@ import (
 	"github.com/lyubomirr/meme-generator-app/core/entities"
 	customErr "github.com/lyubomirr/meme-generator-app/core/errors"
 	"net/http"
+	"strconv"
 )
 
 const (
@@ -34,11 +35,17 @@ func getUserId(ctx context.Context) (uint, error) {
 		return 0, customErr.NewAuthError(errors.New("couldn't get user"))
 	}
 
-	s, ok := claims[SubClaim].(uint)
+	sub, ok := claims[SubClaim].(string)
 	if !ok {
 		return 0, customErr.NewAuthError(errors.New("couldn't get user id"))
 	}
-	return s, nil
+
+	s, err := strconv.Atoi(sub)
+	if err != nil {
+		return 0, customErr.NewAuthError(errors.New("couldn't get user id"))
+	}
+
+	return uint(s), nil
 }
 
 func getMimeType(file []byte) (string, error) {

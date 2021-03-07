@@ -1,14 +1,12 @@
 package web
 
-import "github.com/lyubomirr/meme-generator-app/core/entities"
-
 type loginCredentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 type registrationModel struct {
-	entities.User
+	loginCredentials
 	ConfirmPassword string `json: "confirmPassword"`
 }
 
@@ -19,6 +17,6 @@ type loginResponse struct {
 }
 
 type errorResponse struct {
-	Message string	`json:"message"`
+	Message string	`json:"errorMessage"`
 	StatusCode int `json:"statusCode"`
 }

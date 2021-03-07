@@ -19,8 +19,13 @@ func (s *apiServer) registerHandler (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model.User.Role = entities.Role{ID: entities.NormalRoleId}
-	u, err := s.userService.Create(r.Context(), model.User)
+	user := entities.User{
+		Username: model.Username,
+		Password: model.Password,
+		RoleID:   entities.NormalRoleId,
+	}
+
+	u, err := s.userService.Create(r.Context(), user)
 	if err != nil {
 		handleServiceError(w, err)
 		return

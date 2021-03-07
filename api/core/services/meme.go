@@ -81,6 +81,12 @@ func (m *memeService) Create(ctx context.Context, file []byte, meme entities.Mem
 	}
 	fileName := fmt.Sprintf("%v%v", uuid.NewString(), getFileExtension(mimeType))
 
+	userId, err := getUserId(ctx)
+	if err != nil {
+		return entities.Meme{}, err
+	}
+
+	meme.AuthorID = userId
 	meme.MimeType = mimeType
 	meme.FilePath = path.Join(memeFilesPath, fileName)
 
@@ -125,6 +131,12 @@ func tryRollback(uow repositories.UnitOfWork, err error) error {
 func (m *memeService) AddComment(ctx context.Context, memeID uint, comment entities.Comment) (entities.Meme, error) {
 	uow := m.uowFactory.Create()
 	memes := uow.GetMemeRepository()
+
+	userId, err := getUserId(ctx)
+	if err != nil {
+		return entities.Meme{}, err
+	}
+	comment.AuthorID = userId
 
 	meme, err := memes.Get(memeID)
 	if err != nil {

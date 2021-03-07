@@ -1,14 +1,29 @@
 import { useState } from 'react';
+import ApiFacade from "../api/ApiFacade"
+import { useToasts } from 'react-toast-notifications';
+import { saveUser } from "../auth"
+import { Link, useHistory } from "react-router-dom";
 
-const Login = () => {
+
+const Login = (props) => {
+    let history = useHistory();
+    const { addToast } = useToasts();
+
     const [loginData, setloginData] = useState({
         username: "",
         password: ""
     })
     
-    var handleSubmit = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault()
-        console.log(loginData)
+        ApiFacade.login(loginData)
+            .then(resp => {
+                saveUser(resp)
+                props.setUserFunc(resp)
+                history.push("/")
+            }, err => {
+                addToast(err, {appearance: 'error', autoDismiss: true})
+            })
     }
 
     return (
@@ -28,6 +43,7 @@ const Login = () => {
                     onChange={e => setloginData({...loginData, password: e.target.value})} required />
                 </div>
                 <button type="submit" className="btn btn-dark">Submit</button>
+                <Link to="/Register" className="float-right register-link">Don't have an account? Click here.</Link>
             </form>
         </section>
     )

@@ -6,8 +6,8 @@ import (
 )
 
 var uploadsPath = os.Getenv("uploads_path")
-var templateFilesPath = path.Join( uploadsPath, "templates")
-var memeFilesPath = path.Join( uploadsPath, "memes")
+var templateFilesPath = path.Join(uploadsPath, "templates")
+var memeFilesPath = path.Join(uploadsPath, "memes")
 
 var allowedMimeTypes = map[string]string{
 	"image/png": ".png",

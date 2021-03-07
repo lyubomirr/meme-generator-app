@@ -40,7 +40,7 @@ func newUser(entity entities.User) dbUser {
 		ID:         entity.ID,
 		Username:   entity.Username,
 		Password:   entity.Password,
-		RoleID:     entity.Role.ID,
+		RoleID:     entity.RoleID,
 	}
 }
 

@@ -32,6 +32,9 @@ func (a *userService) ValidateCredentials(
 
 	user, err := repo.GetByUsername(username)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return entities.User{}, customErr.NewAuthError(errors.New("invalid credentials"))
+		}
 		return entities.User{}, customErr.NewAuthError(err)
 	}
 
