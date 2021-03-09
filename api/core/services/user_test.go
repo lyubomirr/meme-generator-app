@@ -19,7 +19,7 @@ func TestUserService_ValidateCredentials(t *testing.T) {
 	plainTextPassword := "admin123$%$"
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainTextPassword), bcrypt.DefaultCost)
 	if err != nil {
-		t.Error("couldnt hash password")
+		t.Error("couldn't hash password")
 	}
 
 	user := entities.User{

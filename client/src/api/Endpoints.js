@@ -7,6 +7,14 @@ class Endpoints {
     static GetTemplateFileUrl(id) {
         return `/api/template/file/${id}`
     }
+
+    static GetMemeFileUrl(id) {
+        return `/api/meme/file/${id}`
+    }
+
+    static GetCommentUrl(memeId) {
+        return `/api/auth/meme/${memeId}/comment`
+    }
 }
 
 export default Endpoints

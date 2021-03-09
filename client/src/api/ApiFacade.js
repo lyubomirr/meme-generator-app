@@ -3,10 +3,10 @@ import Endpoints from "./Endpoints"
 
 class ApiFacade {
     static get(url, auth = false) {
-        let jwt = ""
+        let jwt = "";
         if(auth) {
-            const user = getCurrentUser()
-            jwt = user.jwt
+            const user = getCurrentUser();
+            jwt = user.jwt;
         }
 
         return new Promise((resolve, reject) => {
@@ -29,13 +29,20 @@ class ApiFacade {
         })
     }
 
-    static postJson(url, body) {
+    static postJson(url, body, auth=false) {
+        let jwt = "";
+        if(auth) {
+            const user = getCurrentUser();
+            jwt = user.jwt;
+        }
+
         return new Promise((resolve, reject) => {
             fetch(url, {
                     method: "POST",
                     body: JSON.stringify(body),
                     headers: {
-                        "Content-type": "application/json; charset=UTF-8"
+                        "Content-type": "application/json; charset=UTF-8",
+                        "Authorization": "Bearer " + jwt
                     }
                 })
                 .then(response => response.json())
@@ -51,10 +58,10 @@ class ApiFacade {
     }
 
     static postFormData(url, formData, auth=false) {
-        let jwt = ""
+        let jwt = "";
         if(auth) {
-            const user = getCurrentUser()
-            jwt = user.jwt
+            const user = getCurrentUser();
+            jwt = user.jwt;
         }
 
         return new Promise((resolve, reject) => {
@@ -77,24 +84,52 @@ class ApiFacade {
         })
     }
 
+    static delete(url, auth = false) {
+        let jwt = "";
+        if(auth) {
+            const user = getCurrentUser();
+            jwt = user.jwt;
+        }
+
+        return new Promise((resolve, reject) => {
+            fetch(url, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-type": "application/json; charset=UTF-8",
+                        "Authorization": "Bearer " + jwt
+                    }
+                })
+                .then(response => response.json())
+                .then(jsonResponse => {
+                    if (jsonResponse.hasOwnProperty("errorMessage")) {
+                        reject(jsonResponse.errorMessage);
+                    } else {
+                        resolve(jsonResponse);
+                    }
+                })
+                .catch(err => reject(err));
+        })
+    }
+
+
     static login(loginData) {
-        return this.postJson(Endpoints.Login, loginData)
+        return this.postJson(Endpoints.Login, loginData);
     }
 
     static register(registerData) {
-        return this.postJson(Endpoints.Register, registerData)
+        return this.postJson(Endpoints.Register, registerData);
     } 
 
     static getMemes() { 
-        return this.get(Endpoints.Memes, true)
+        return this.get(Endpoints.Memes, true);
     }
 
     static getTemplates() { 
-        return this.get(Endpoints.Templates, true)
+        return this.get(Endpoints.Templates, true);
     }
 
     static getTemplate(id) {
-        return this.get(`${Endpoints.Templates}/${id}`, true)
+        return this.get(`${Endpoints.Templates}/${id}`, true);
     }
 
     static createMeme(meme, fileBlob) {
@@ -102,7 +137,17 @@ class ApiFacade {
         formData.append("file", fileBlob)
         formData.append("meme", JSON.stringify(meme))
 
-        return this.postFormData(Endpoints.Memes, formData, true)
+        return this.postFormData(Endpoints.Memes, formData, true);
+    }
+
+    static addComment(memeId, comment) {
+        return this.postJson(Endpoints.GetCommentUrl(memeId), comment, true);
+    }
+
+    static deleteComment(memeId, commentId) {
+        let url = Endpoints.GetCommentUrl(memeId);
+        url = url + "/" + commentId;
+        return this.delete(url, true)
     }
 }
 

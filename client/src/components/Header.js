@@ -25,11 +25,8 @@ const Header = (props) => {
                             <Link to="/" className="nav-link">Browse Memes</Link>
                         </li>
                         <li className="nav-item">
-                            <Link to="/" className="nav-link">My Memes</Link>
-                        </li>
-                        <li className="nav-item">
                             <Link to="/templates" className="nav-link">Create Meme</Link>
-                        </li>                
+                        </li>             
                     </ul>            
                 }
 

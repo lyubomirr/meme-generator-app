@@ -144,11 +144,18 @@ func (m *mySqlMemeRepository) Update(meme entities.Meme) (entities.Meme, error) 
 	}
 
 	dbMeme = newMeme(meme)
+	m.db.Model(&dbMeme).Association("Comments").Replace(dbMeme.Comments)
+
 	result = m.db.Save(&dbMeme)
 	if result.Error != nil {
 		return entities.Meme{}, result.Error
 	}
-	return dbMeme.toEntity(), nil
+
+	updated, err := m.Get(meme.ID)
+	if err != nil {
+		return entities.Meme{}, err
+	}
+	return updated, nil
 }
 
 func (m mySqlMemeRepository) Delete(id uint) error {

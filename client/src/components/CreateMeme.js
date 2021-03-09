@@ -24,7 +24,6 @@ const CreateMeme = (props) => {
         });
         setBackgroundImage(canvas)
         
-        const texts = []
         let idx = 1;
         for(const pos of textPositions) {
             const t = new fabric.Textbox('TEXT ' + idx,  
@@ -38,7 +37,6 @@ const CreateMeme = (props) => {
                 textAlign: 'center'
             });
             idx++;
-            texts.push(t);
             canvas.add(t);
         }
     }

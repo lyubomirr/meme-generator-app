@@ -36,7 +36,7 @@ type Meme struct {
 	FilePath   string    `json:"-" validate:"required"`
 	MimeType   string    `json:"mimeType" validate:"required,max=50`
 	CreatedAt  time.Time `json:"createdAt"`
-	Comments   []Comment `json:"comments,omitempty"`
+	Comments   []Comment `json:"comments"`
 	TemplateID uint      `json:"templateId"`
 	Template   Template  `json:"template" validate:"-"`
 }

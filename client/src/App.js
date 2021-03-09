@@ -20,8 +20,8 @@ function App() {
         <Header user={user} setUserFunc={setUser} />
         <div className="container main-container">
           <Switch>
-            <PrivateRoute component={Memes} path="/" exact />
-            <PrivateRoute component={Templates} path="/templates" exact />
+            <PrivateRoute component={Memes} path="/" user={user} exact />
+            <PrivateRoute component={Templates} path="/templates" user={user} exact />
             <PrivateRoute component={CreateMeme} path="/create-meme/:id" />
             <Route exact path="/login">
               <Login setUserFunc={setUser} />
