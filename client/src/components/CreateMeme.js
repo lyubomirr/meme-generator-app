@@ -54,7 +54,7 @@ const CreateMeme = (props) => {
                 setTemplate(t)
                 initializeCanvas(t.textPositions)
             }, err => {
-                addToast(err, {appearance: 'error', autoDismiss: true})
+                addToast(err.message, {appearance: 'error', autoDismiss: true})
             })
     }, [])
 
@@ -74,7 +74,7 @@ const CreateMeme = (props) => {
                     addToast("Meme added successfully!", {appearance: 'success'})
                     setTitle("")
                 }, err => {
-                    addToast(err, {appearance: 'error', autoDismiss: true})
+                    addToast(err.message, {appearance: 'error', autoDismiss: true})
                 })
 
         }, template.mimeType)

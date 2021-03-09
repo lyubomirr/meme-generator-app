@@ -22,7 +22,7 @@ const Register = (props) => {
                 props.setUserFunc(resp)
                 history.push("/")
             }, err => {
-                addToast(err, {appearance: 'error', autoDismiss: true})
+                addToast(err.message, {appearance: 'error', autoDismiss: true})
             })
     }
 

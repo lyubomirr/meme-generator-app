@@ -145,3 +145,12 @@ body {
     color: #dc3545;
     cursor: pointer;
 }
+
+.delete-meme-icon,
+.delete-template-icon {
+    color: #dc3545;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 8px;
+}

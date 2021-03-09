@@ -177,7 +177,7 @@ func (m *memeService) DeleteComment(ctx context.Context, memeID uint, commentId 
 		return entities.Meme{}, err
 	}
 
-	if meme.Comments[commentIdx].Author.ID != userId {
+	if !IsAdministrator(ctx) && meme.Comments[commentIdx].Author.ID != userId {
 		return entities.Meme{},
 		customErr.NewRightsError(errors.New("cannot delete comment that does not belong to the user"))
 	}
@@ -219,7 +219,7 @@ func (m *memeService) Delete(ctx context.Context, id uint) (err error) {
 		return tryRollback(uow, err)
 	}
 
-	if userId != meme.Author.ID {
+	if !IsAdministrator(ctx) && userId != meme.Author.ID {
 		return customErr.NewRightsError(errors.New("cannot delete meme that does not belong to the user"))
 	}
 

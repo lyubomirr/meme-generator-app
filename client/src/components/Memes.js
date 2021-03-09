@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 
 const Memes = (props) => {
+    const isAdmin = props.user.role === "Administrator";
     const { addToast } = useToasts();
     const [memes, setMemes] = useState([])
 
@@ -17,7 +18,7 @@ const Memes = (props) => {
             }
             setMemes(memes)
         }, err => {
-            addToast(err, {appearance: 'error', autoDismiss: true})
+            addToast(err.message, {appearance: 'error', autoDismiss: true})
         })
     }, [])
 
@@ -46,7 +47,7 @@ const Memes = (props) => {
             parseMeme(m)
             updateMeme(m)
         }, err => {
-            addToast(err, {appearance: 'error', autoDismiss: true})
+            addToast(err.message, {appearance: 'error', autoDismiss: true})
         })
     }
 
@@ -54,9 +55,28 @@ const Memes = (props) => {
         ApiFacade.deleteComment(meme.id, commentId).then(m => {
             parseMeme(m)
             updateMeme(m)
+            addToast("Sucesfully deleted comment.", {appearance: 'success', autoDismiss: true})
         }, err => {
-            addToast(err, {appearance: 'error', autoDismiss: true})
+            addToast(err.message, {appearance: 'error', autoDismiss: true})
         })
+    }
+
+    const deleteMeme = meme => {
+        ApiFacade.deleteMeme(meme.id).then(() => {
+            removeMemeFromState(meme)
+            addToast("Sucesfully deleted meme.", {appearance: 'success', autoDismiss: true})
+        }, err => {
+            addToast(err.message, {appearance: 'error', autoDismiss: true})
+        })
+    }
+
+    const removeMemeFromState = meme => {
+        const idx = memes.indexOf(meme)
+        if (idx === -1) {
+            return
+        }
+        memes.splice(idx, 1)
+        setMemes(memes)
     }
 
     return (
@@ -65,6 +85,11 @@ const Memes = (props) => {
                 <h2 className="mb-4">Memes</h2>
             </div>
             <div className="row">
+            {memes.length == 0 &&
+                <div className="col-12 text-center mt-5">
+                    <h3 className="text-center">No memes added :(</h3>
+                </div> 
+            }
             {memes.map(meme => {
                 return (
                     <div className="col-sm-10 col-12 mb-4" key={meme.id}>
@@ -77,6 +102,12 @@ const Memes = (props) => {
                                     </div> 
                                 </div>
                                 <div className="col-sm-6 col-12 comments-container">
+                                    {(meme.author.username === props.user.username || isAdmin) && 
+                                        <span className="delete-meme-icon" onClick={() => deleteMeme(meme)}>
+                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                        </span>                                                                
+                                    }
+    
                                     <div className="d-flex justify-content-center pt-3 pb-2"> 
                                         <form onSubmit={(e) => addComment(e, meme)}>
                                             <input type="text" name="text" placeholder="+ Add comment" className="form-control addtxt" required
@@ -89,7 +120,7 @@ const Memes = (props) => {
                                             <div className="second py-2 px-2">
                                                 <div className="d-flex justify-content-between py-1 pt-2">
                                                     <div><span className="text2">{comment.content}</span></div>
-                                                    {comment.author.username == props.user.username && 
+                                                    {(comment.author.username === props.user.username || isAdmin) && 
                                                         <div onClick={() => deleteComment(meme, comment.id)}>
                                                             <span className="text3 delete-comment-icon">
                                                                 <FontAwesomeIcon icon={faTrashAlt} />

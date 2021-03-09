@@ -3,6 +3,7 @@ class Endpoints {
     static Register = "/api/register";
     static Memes = "/api/auth/meme";
     static Templates = "/api/auth/template";
+    static DeleteTemplate = "/api/auth/admin/template"
 
     static GetTemplateFileUrl(id) {
         return `/api/template/file/${id}`

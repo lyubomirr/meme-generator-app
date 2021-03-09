@@ -17,7 +17,9 @@ class ApiFacade {
                         "Authorization": "Bearer " + jwt
                     }
                 })
-                .then(response => response.json())
+                .then(response => response.json().catch(() => {
+                    return {}
+                }))
                 .then(jsonResponse => {
                     if (jsonResponse.hasOwnProperty("errorMessage")) {
                         reject(jsonResponse.errorMessage);
@@ -45,7 +47,9 @@ class ApiFacade {
                         "Authorization": "Bearer " + jwt
                     }
                 })
-                .then(response => response.json())
+                .then(response => response.json().catch(() => {
+                    return {}
+                }))
                 .then(jsonResponse => {
                     if (jsonResponse.hasOwnProperty("errorMessage")) {
                         reject(jsonResponse.errorMessage);
@@ -72,7 +76,9 @@ class ApiFacade {
                         "Authorization": "Bearer " + jwt
                     }
                 })
-                .then(response => response.json())
+                .then(response => response.json().catch(() => {
+                    return {}
+                }))
                 .then(jsonResponse => {
                     if (jsonResponse.hasOwnProperty("errorMessage")) {
                         reject(jsonResponse.errorMessage);
@@ -99,10 +105,12 @@ class ApiFacade {
                         "Authorization": "Bearer " + jwt
                     }
                 })
-                .then(response => response.json())
+                .then(response => response.json().catch(() => {
+                    return {}
+                }))
                 .then(jsonResponse => {
                     if (jsonResponse.hasOwnProperty("errorMessage")) {
-                        reject(jsonResponse.errorMessage);
+                        reject({message: jsonResponse.errorMessage});
                     } else {
                         resolve(jsonResponse);
                     }
@@ -132,6 +140,10 @@ class ApiFacade {
         return this.get(`${Endpoints.Templates}/${id}`, true);
     }
 
+    static deleteTemplate(id) {
+        return this.delete(`${Endpoints.DeleteTemplate}/${id}`, true);
+    }
+
     static createMeme(meme, fileBlob) {
         const formData = new FormData();
         formData.append("file", fileBlob)
@@ -147,6 +159,11 @@ class ApiFacade {
     static deleteComment(memeId, commentId) {
         let url = Endpoints.GetCommentUrl(memeId);
         url = url + "/" + commentId;
+        return this.delete(url, true)
+    }
+
+    static deleteMeme(memeId) {
+        let url = `${Endpoints.Memes}/${memeId}`;
         return this.delete(url, true)
     }
 }
