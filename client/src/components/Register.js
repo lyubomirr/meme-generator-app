@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ApiFacade from "../api/ApiFacade"
 import { useToasts } from 'react-toast-notifications';
 import { saveUser } from "../auth"
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 const Register = (props) => {
     let history = useHistory();

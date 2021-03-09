@@ -85,7 +85,7 @@ const Memes = (props) => {
                 <h2 className="mb-4">Memes</h2>
             </div>
             <div className="row">
-            {memes.length == 0 &&
+            {memes.length === 0 &&
                 <div className="col-12 text-center mt-5">
                     <h3 className="text-center">No memes added :(</h3>
                 </div> 

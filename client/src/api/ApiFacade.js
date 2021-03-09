@@ -22,7 +22,7 @@ class ApiFacade {
                 }))
                 .then(jsonResponse => {
                     if (jsonResponse.hasOwnProperty("errorMessage")) {
-                        reject(jsonResponse.errorMessage);
+                        reject({message: jsonResponse.errorMessage});
                     } else {
                         resolve(jsonResponse);
                     }
@@ -52,7 +52,7 @@ class ApiFacade {
                 }))
                 .then(jsonResponse => {
                     if (jsonResponse.hasOwnProperty("errorMessage")) {
-                        reject(jsonResponse.errorMessage);
+                        reject({message: jsonResponse.errorMessage});
                     } else {
                         resolve(jsonResponse);
                     }
@@ -81,7 +81,7 @@ class ApiFacade {
                 }))
                 .then(jsonResponse => {
                     if (jsonResponse.hasOwnProperty("errorMessage")) {
-                        reject(jsonResponse.errorMessage);
+                        reject({message: jsonResponse.errorMessage});
                     } else {
                         resolve(jsonResponse);
                     }

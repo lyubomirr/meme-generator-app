@@ -10,6 +10,8 @@ import CustomToast from "./components/CustomToast"
 import { getCurrentUser } from './auth';
 import { useState } from 'react';
 import CreateMeme from './components/CreateMeme';
+import CreateTemplate from './components/CreateTemplate';
+import NotFound from "./components/NotFound";
 
 function App() {
   const [user, setUser] = useState(getCurrentUser())
@@ -20,15 +22,17 @@ function App() {
         <Header user={user} setUserFunc={setUser} />
         <div className="container main-container">
           <Switch>
-            <PrivateRoute component={Memes} path="/" user={user} exact />
-            <PrivateRoute component={Templates} path="/templates" user={user} exact />
-            <PrivateRoute component={CreateMeme} path="/create-meme/:id" />
+            <PrivateRoute component={Memes} path="/" exact />
+            <PrivateRoute component={Templates} path="/templates" exact />
+            <PrivateRoute component={CreateMeme} path="/create-meme/:id" />        
+            <PrivateRoute component={CreateTemplate} adminOnly={true} path="/create-template" />
             <Route exact path="/login">
               <Login setUserFunc={setUser} />
             </Route>
             <Route exact path="/register">
               <Register setUserFunc={setUser} />
             </Route>
+            <Route component={NotFound} />
           </Switch>
         </div>
       </div>

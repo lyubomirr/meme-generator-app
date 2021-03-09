@@ -52,7 +52,7 @@ const Templates = (props) => {
 
             </div>
             <div className="row">
-            {templates.length == 0 &&
+            {templates.length === 0 &&
                 <div className="col-12 text-center mt-5">
                     <h3 className="text-center">No templates added :(</h3>
                 </div> 

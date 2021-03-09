@@ -154,3 +154,8 @@ body {
     right: 15px;
     top: 8px;
 }
+
+.not-found-img {
+    display: block;
+    margin: 0 auto;
+}

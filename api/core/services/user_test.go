@@ -37,7 +37,6 @@ func TestUserService_ValidateCredentials(t *testing.T) {
 	f := mocks.NewMockUoWFactory(ctrl)
 	f.EXPECT().Create().Return(u)
 
-
 	sut := userService{uowFactory: f}
 	_, err = sut.ValidateCredentials(context.Background(), user.Username, plainTextPassword)
 
