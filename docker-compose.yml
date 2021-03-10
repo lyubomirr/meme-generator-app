@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  api:
+    container_name: "meme-api-container"
+    image: memeapi
+    environment:
+      - dsn=root:admin@tcp(host.docker.internal:3306)/memegenerator?charset=utf8mb4&parseTime=True&loc=Local
+      - jwt_secret=secret12312312
+      - uploads_path=/uploads
+    volumes:
+      - 'D:\meme-generator-app\api\uploads:/uploads'
+    expose:
+      - "8080"
+  clientapp:
+    container_name: "memeapp-client-container"
+    image: memeappclient
+    links:
+      - api
+    ports:
+      - "3001:3000"

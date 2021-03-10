@@ -29,7 +29,7 @@ const CreateTemplate = (props) => {
     const handleSubmit = e => {
         e.preventDefault();
 
-        if(textboxes.length == 0) {
+        if(textboxes.length === 0) {
             addToast("You should add at least one textbox", {appearance: 'error', autoDismiss: true})
             return;
         }
@@ -54,7 +54,7 @@ const CreateTemplate = (props) => {
     }
 
     const handleFileUpload = e => {
-        if (e.target.files.length == 0) {
+        if (e.target.files.length === 0) {
             canvas.clear();
             return;
         }
@@ -82,7 +82,7 @@ const CreateTemplate = (props) => {
 
     const copyLastTextbox = e => {
         e.preventDefault();
-        if(textboxes.length == 0) {
+        if(textboxes.length === 0) {
             addToast("You should add at least one textbox!", {appearance: 'error'})
             return
         }
@@ -136,7 +136,7 @@ const CreateTemplate = (props) => {
                         <div className="form-group textbox-btns-wrapper">
                             <button className="btn btn-success textbox-btn" onClick={addTextbox}>Add textbox</button>                   
                             <button className="btn btn-primary textbox-btn" onClick={copyLastTextbox} 
-                                disabled={textboxes.length == 0}>Copy last textbox</button>
+                                disabled={textboxes.length === 0}>Copy last textbox</button>
                             <button className="btn btn-danger textbox-btn" onClick={removeTextbox}>Remove textbox</button>
                         </div>
                         <div className="form-group text-center">
