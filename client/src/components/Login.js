@@ -6,7 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 
 
 const Login = (props) => {
-    let history = useHistory();
+    const history = useHistory();
     const { addToast } = useToasts();
 
     const [loginData, setloginData] = useState({

@@ -95,7 +95,7 @@ const Memes = (props) => {
                     <div className="col-sm-10 col-12 mb-4" key={meme.id}>
                         <div className="card">
                             <div className="row">
-                                <div className="col-sm-6 col-12">
+                                <div className="col-sm-6 col-12 meme-img-container">
                                     <img className="card-img-top" src={Endpoints.GetMemeFileUrl(meme.id)} alt={meme.title} />
                                     <div className="card-body text-center">
                                         <h5 className="card-title meme-title">{meme.title}</h5>

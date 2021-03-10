@@ -140,8 +140,16 @@ class ApiFacade {
         return this.get(`${Endpoints.Templates}/${id}`, true);
     }
 
+    static createTemplate(template, fileBlob) {    
+        const formData = new FormData();
+        formData.append("file", fileBlob)
+        formData.append("template", JSON.stringify(template))
+
+        return this.postFormData(Endpoints.AdminTemplatePath, formData, true);    
+    }
+
     static deleteTemplate(id) {
-        return this.delete(`${Endpoints.DeleteTemplate}/${id}`, true);
+        return this.delete(`${Endpoints.AdminTemplatePath}/${id}`, true);
     }
 
     static createMeme(meme, fileBlob) {

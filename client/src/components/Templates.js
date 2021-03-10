@@ -44,7 +44,7 @@ const Templates = (props) => {
         <div>
             <div className="row">
                 <h2 className="mb-4">Choose template</h2>
-                {isAdmin && <div class="add-icon"> 
+                {isAdmin && <div className="add-icon"> 
                     <Link to="/create-template">
                         <FontAwesomeIcon icon={faPlusSquare} />
                     </Link>
@@ -59,7 +59,7 @@ const Templates = (props) => {
             }
             {templates.map((template) => {
                 return <div className="col-md-3 col-sm-4 col-6 mb-4" key={template.id}>
-                <div className="card">
+                <div className="card h-100 template-card">
                     {isAdmin && 
                         <span className="delete-template-icon" onClick={() => deleteTemplate(template)}>
                             <FontAwesomeIcon icon={faTrashAlt} />

@@ -72,6 +72,10 @@ html {
     justify-content: center;
 }
 
+.new-template-form-wrapper {
+    padding: 2rem;
+}
+
 .new-meme-form-wrapper form {
     width: 90%;
 }
@@ -158,4 +162,33 @@ body {
 .not-found-img {
     display: block;
     margin: 0 auto;
+}
+
+.textbox-btn {
+    height: 40px;
+    line-height: 20px;
+}
+
+.textbox-btns-wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+.meme-img-container,
+.comments-container,
+.meme-img-container img {
+    max-height: 500px;
+}
+
+.comments-container {
+    overflow: auto;
+}
+
+.template-card .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.template-card .card-body .card-title {
+    margin-top: auto;
 }
