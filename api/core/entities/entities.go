@@ -20,12 +20,12 @@ type Role struct {
 }
 
 type User struct {
-	ID         uint   `json:"id"`
-	Username   string `json:"username" validate:"required,max=25"`
-	Password   string `json:"-" validate:"required,min=8"`
-	RoleID     uint   `json:"roleId" validate:"required"`
-	Role       Role   `json:"role" validate:"-"`
-	Memes      []Meme `json:"memes,omitempty"`
+	ID       uint   `json:"id"`
+	Username string `json:"username" validate:"required,max=25"`
+	Password string `json:"-" validate:"required,min=8"`
+	RoleID   uint   `json:"roleId" validate:"required"`
+	Role     Role   `json:"role" validate:"-"`
+	Memes    []Meme `json:"memes,omitempty"`
 }
 
 type Meme struct {
@@ -51,15 +51,17 @@ type Comment struct {
 }
 
 type Template struct {
-	ID            uint                   `json:"id"`
-	Name          string                 `json:"name" validate:"required,max=50"`
-	FilePath      string                 `json:"-" validate:"required"`
-	MimeType      string                 `json:"mimeType" validate:"required,max=50`
-	TextPositions []TemplateTextPosition `json:"textPositions" validate:"required"`
-	CreatedAt     time.Time
+	ID        uint              `json:"id"`
+	Name      string            `json:"name" validate:"required,max=50"`
+	FilePath  string            `json:"-" validate:"required"`
+	MimeType  string            `json:"mimeType" validate:"required,max=50`
+	Textboxes []TemplateTextbox `json:"textboxes" validate:"required"`
+	CreatedAt time.Time
 }
 
-type TemplateTextPosition struct {
-	TopOffset  uint `json:"topOffset"`
-	LeftOffset uint `json:"leftOffset"`
+type TemplateTextbox struct {
+	TopOffset  float64 `json:"topOffset"`
+	LeftOffset float64 `json:"leftOffset"`
+	Width      float64 `json:"width" validate:"required,gt=0"`
+	Height     float64 `json:"height" validate:"required,gt=0"`
 }

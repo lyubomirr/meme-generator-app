@@ -69,7 +69,7 @@ const CreateMeme = (props) => {
 
             ApiFacade.createMeme(meme, blob)
                 .then(m => {
-                    addToast("Meme added successfully!", {appearance: 'success'})
+                    addToast("Meme added successfully!", {appearance: 'success', autoDismiss: true})
                     history.push("/")
                 }, err => {
                     addToast(err.message, {appearance: 'error', autoDismiss: true})

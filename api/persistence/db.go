@@ -7,6 +7,7 @@ import (
 	"github.com/lyubomirr/meme-generator-app/core/entities"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"os"
 	"sync"
 	"time"
 )
@@ -47,7 +48,7 @@ func migrate() error {
 		return err
 	}
 
-	err = db.AutoMigrate(&dbTemplateTextPosition{})
+	err = db.AutoMigrate(&dbTemplateTextbox{})
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,7 @@ func migrate() error {
 func getDB() *gorm.DB {
 	if instance == nil {
 		doOnce.Do(func() {
-			dsn := "root:admin@tcp(127.0.0.1:3306)/memegenerator?charset=utf8mb4&parseTime=True&loc=Local"
+			dsn := os.Getenv("dsn")
 			var err error
 			instance, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 			if err != nil {

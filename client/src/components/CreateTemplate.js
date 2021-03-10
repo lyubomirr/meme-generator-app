@@ -46,7 +46,7 @@ const CreateTemplate = (props) => {
         const blob = fileInput.current.files[0];
         ApiFacade.createTemplate(template, blob)
         .then(t => {
-            addToast("Template added successfully!", {appearance: 'success'})
+            addToast("Template added successfully!", {appearance: 'success', autoDismiss: true})
             history.push("/templates")                  
         }, err => {
             addToast(err.message, {appearance: 'error', autoDismiss: true})

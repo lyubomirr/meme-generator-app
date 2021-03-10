@@ -7,7 +7,7 @@ func main() {
 	//t := entities.Template{
 	//	Name:          "pesho",
 	//	FilePath:      "asd.png",
-	//	TextPositions: []entities.TemplateTextPosition{{
+	//	Textboxes: []entities.TemplateTextPosition{{
 	//		TopOffset:  10,
 	//		LeftOffset: 20,
 	//	}},

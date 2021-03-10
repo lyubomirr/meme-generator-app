@@ -8,22 +8,24 @@ import (
 	"time"
 )
 
-type dbTemplateTextPosition struct {
-	TopOffset uint `gorm:"primaryKey"`
-	LeftOffset uint `gorm:"primaryKey"`
-	TemplateID uint `gorm:"primaryKey"`
+type dbTemplateTextbox struct {
+	TemplateID uint    `gorm:"primaryKey"`
+	TopOffset  float64 `gorm:"primaryKey"`
+	LeftOffset float64 `gorm:"primaryKey"`
+	Width      float64
+	Height     float64
 }
 
-func (dbTemplateTextPosition) TableName() string {
-	return "template_text_positions"
+func (dbTemplateTextbox) TableName() string {
+	return "template_textboxes"
 }
 
 type dbTemplate struct {
-	ID       uint
-	Name    string `gorm:"type:varchar(50)"`
-	FilePath string
-	MimeType string `gorm:"type:varchar(50)"`
-	TextPositions []dbTemplateTextPosition `gorm:"foreignKey:TemplateID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ID        uint
+	Name      string `gorm:"type:varchar(50)"`
+	FilePath  string
+	MimeType  string              `gorm:"type:varchar(50)"`
+	Textboxes []dbTemplateTextbox `gorm:"foreignKey:TemplateID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	CreatedAt time.Time
 }
 
@@ -31,23 +33,27 @@ func (dbTemplate) TableName() string {
 	return "templates"
 }
 
-func textPositionsToEntities(positions []dbTemplateTextPosition) []entities.TemplateTextPosition {
-	e := make([]entities.TemplateTextPosition, 0, len(positions))
-	for _, p := range positions {
-		e = append(e, entities.TemplateTextPosition{
-			TopOffset:  p.TopOffset,
-			LeftOffset: p.LeftOffset,
+func textboxesToEntities(textboxes []dbTemplateTextbox) []entities.TemplateTextbox {
+	e := make([]entities.TemplateTextbox, 0, len(textboxes))
+	for _, t := range textboxes {
+		e = append(e, entities.TemplateTextbox{
+			TopOffset:  t.TopOffset,
+			LeftOffset: t.LeftOffset,
+			Width:      t.Width,
+			Height:     t.Height,
 		})
 	}
 	return e
 }
 
-func newTextPositions(positions []entities.TemplateTextPosition) []dbTemplateTextPosition {
-	dbModels := make([]dbTemplateTextPosition, 0, len(positions))
-	for _, p := range positions {
-		dbModels = append(dbModels, dbTemplateTextPosition{
-			LeftOffset: p.LeftOffset,
-			TopOffset: p.TopOffset,
+func newTextboxes(textboxes []entities.TemplateTextbox) []dbTemplateTextbox {
+	dbModels := make([]dbTemplateTextbox, 0, len(textboxes))
+	for _, t := range textboxes {
+		dbModels = append(dbModels, dbTemplateTextbox{
+			LeftOffset: t.LeftOffset,
+			TopOffset:  t.TopOffset,
+			Width:      t.Width,
+			Height:     t.Height,
 		})
 	}
 	return dbModels
@@ -55,28 +61,28 @@ func newTextPositions(positions []entities.TemplateTextPosition) []dbTemplateTex
 
 func (m dbTemplate) toEntity() entities.Template {
 	return entities.Template{
-		ID:       m.ID,
-		Name:     m.Name,
-		FilePath: m.FilePath,
-		MimeType: m.MimeType,
-		TextPositions: textPositionsToEntities(m.TextPositions),
+		ID:        m.ID,
+		Name:      m.Name,
+		FilePath:  m.FilePath,
+		MimeType:  m.MimeType,
+		Textboxes: textboxesToEntities(m.Textboxes),
 		CreatedAt: m.CreatedAt,
 	}
 }
 
 func newTemplate(template entities.Template) dbTemplate {
 	return dbTemplate{
-		ID:       template.ID,
-		Name:     template.Name,
-		FilePath: template.FilePath,
-		MimeType: template.MimeType,
-		TextPositions: newTextPositions(template.TextPositions),
+		ID:        template.ID,
+		Name:      template.Name,
+		FilePath:  template.FilePath,
+		MimeType:  template.MimeType,
+		Textboxes: newTextboxes(template.Textboxes),
 		CreatedAt: template.CreatedAt,
 	}
 }
 
 type mySqlTemplateRepository struct {
-	db *gorm.DB
+	db       *gorm.DB
 	validate *validator.Validate
 }
 
